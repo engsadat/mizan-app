@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>ميزان — طباعة تقرير الموظفين</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background: #f8fafc; }
+    .section-title { background: #f1f5f9; padding: 7px 12px; border-radius: 6px; font-weight: 600; color: #0a1f3d; margin-bottom: .8rem; font-size: .9rem; }
+    .filter-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 1.2rem 1.5rem; margin-bottom: 1.2rem; }
+    .col-check label { font-size: .85rem; }
+    .badge-filter { font-size: .75rem; background: #e2e8f0; color: #334155; border-radius: 20px; padding: 2px 10px; margin: 2px; display: inline-block; }
+    .result-header { background: #0a1f3d; color: #fff; padding: 10px 18px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .result-table th { background: #0a1f3d; color: #fff; font-size: .82rem; white-space: nowrap; }
+    .result-table td { font-size: .83rem; vertical-align: middle; }
+    .result-table tbody tr:hover { background: #f0f9ff; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      .print-header { display: block !important; }
+      .result-table th { background: #0a1f3d !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .result-table { font-size: 10pt; }
+      .container { max-width: 100% !important; padding: 0; }
+    }
+    .print-header { display: none; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar mb-3 no-print" style="background:#0a1f3d">
+  <a href="/employees/" class="navbar-brand text-white px-3">← قائمة الموظفين</a>
+  <span class="text-white px-3 fw-bold">طباعة تقرير الموظفين</span>
+</nav>
+
+<div class="container py-2" style="max-width:1100px">
+
+  <!-- ══ Filter Form ══════════════════════════════════════════════ -->
+  <form method="POST" class="no-print">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Filters -->
+    <div class="filter-card">
+      <div class="section-title">فلاتر التقرير</div>
+      <div class="row g-3">
+
+        <!-- Regions -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold mb-1">المنطقة</label>
+          <div class="d-flex flex-wrap gap-3">
+            {% for r in regions %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="regions" value="{{ r }}" id="reg-{{ loop.index }}"
+                {% if r in (f.get('regions') or []) %}checked{% endif %}>
+              <label class="form-check-label" for="reg-{{ loop.index }}">{{ r }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="form-text">اتركه فارغاً لعرض الكل</div>
+        </div>
+
+        <!-- Nationality group -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold mb-1">الجنسية</label>
+          {% set nat = f.get('nat_group', '') %}
+          {% for opt in ['', 'سعودي', 'غير سعودي'] %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="nat_group" value="{{ opt }}" id="nat-{{ loop.index }}"
+              {% if nat == opt %}checked{% endif %}>
+            <label class="form-check-label" for="nat-{{ loop.index }}">{{ opt if opt else 'الكل' }}</label>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Supervision type -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold mb-1">نوع الإشراف</label>
+          {% set sup = f.get('supervision', '') %}
+          {% for opt in ['', 'إشراف', 'دعم فني'] %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="supervision" value="{{ opt }}" id="sup-{{ loop.index }}"
+              {% if sup == opt %}checked{% endif %}>
+            <label class="form-check-label" for="sup-{{ loop.index }}">{{ opt if opt else 'الكل' }}</label>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-1">الموقف الوظيفي</label>
+          <div class="d-flex flex-wrap gap-3">
+            {% for s in all_statuses %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="status_ids" value="{{ s.id }}" id="st-{{ s.id }}"
+                {% if s.id|string in (f.get('status_ids') or []) %}checked{% endif %}>
+              <label class="form-check-label" for="st-{{ s.id }}">{{ s.name_ar }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="form-text">اتركه فارغاً لعرض الكل</div>
+        </div>
+
+        <!-- Job code -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-1">الوظيفة</label>
+          <select name="job_code_id" class="form-select form-select-sm">
+            <option value="">— الكل —</option>
+            {% for jc in job_codes %}
+            <option value="{{ jc.id }}" {% if f.get('job_code_id') == jc.id|string %}selected{% endif %}>{{ jc.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Attendance group -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-1">كشف الحضور</label>
+          <select name="att_group_id" class="form-select form-select-sm">
+            <option value="">— الكل —</option>
+            {% for g in att_groups %}
+            <option value="{{ g.id }}" {% if f.get('att_group_id') == g.id|string %}selected{% endif %}>{{ g.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Column selection -->
+    <div class="filter-card">
+      <div class="section-title">الأعمدة المعروضة</div>
+      <div class="row row-cols-2 row-cols-md-4 g-2 col-check">
+        <div class="col">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" disabled checked>
+            <label class="form-check-label text-muted">الاسم (دائماً)</label>
+          </div>
+        </div>
+        {% for key, label, default in report_columns %}
+        <div class="col">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="cols" value="{{ key }}" id="col-{{ key }}"
+              {% if key in selected_cols %}checked{% endif %}>
+            <label class="form-check-label" for="col-{{ key }}">{{ label }}</label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <button type="submit" class="btn" style="background:#0a1f3d;color:#fff">عرض النتائج</button>
+      <button type="reset" class="btn btn-outline-secondary me-2">إعادة تعيين</button>
+    </div>
+  </form>
+
+  <!-- ══ Results ══════════════════════════════════════════════════ -->
+  {% if filters_applied %}
+
+  <!-- Print-only header -->
+  <div class="print-header">
+    <div style="text-align:center; margin-bottom:8px;">
+      <strong style="font-size:14pt">تقرير الموظفين — ميزان</strong>
+    </div>
+    <div style="font-size:9pt; color:#555; margin-bottom:4px;">
+      {% if f.get('regions') %}<span>المنطقة: {{ f.regions | join(' / ') }}</span> &nbsp;|&nbsp; {% endif %}
+      {% if f.get('nat_group') %}<span>الجنسية: {{ f.nat_group }}</span> &nbsp;|&nbsp; {% endif %}
+      {% if f.get('supervision') %}<span>الإشراف: {{ f.supervision }}</span> &nbsp;|&nbsp; {% endif %}
+      <span>العدد: {{ employees | length }}</span>
+    </div>
+    <hr style="margin:4px 0">
+  </div>
+
+  <div class="result-header no-print">
+    <span class="fw-bold">نتائج التقرير</span>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-light text-dark">{{ employees | length }} موظف</span>
+      <button onclick="window.print()" class="btn btn-sm btn-light">🖨 طباعة</button>
+    </div>
+  </div>
+
+  {% if employees %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm result-table mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الاسم</th>
+          {% for key, label, _ in report_columns %}{% if key in selected_cols %}<th>{{ label }}</th>{% endif %}{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set ns = namespace(counter=0, prev_region='') %}
+        {% for emp in employees %}
+          {% if 'region' in selected_cols and emp.region != ns.prev_region %}
+          {% set ns.prev_region = emp.region %}
+          <tr style="background:#dbeafe">
+            <td colspan="{{ selected_cols|length + 2 }}" class="fw-bold" style="color:#1e3a5f;font-size:.8rem">{{ emp.region or '—' }}</td>
+          </tr>
+          {% endif %}
+          {% set ns.counter = ns.counter + 1 %}
+        <tr>
+          <td class="text-muted" style="width:36px">{{ ns.counter }}</td>
+          <td class="fw-semibold">{{ emp.full_name }}</td>
+          {% if 'job'         in selected_cols %}<td>{{ emp.job_code.title if emp.job_code else '—' }}</td>{% endif %}
+          {% if 'region'      in selected_cols %}<td>{{ emp.region or '—' }}</td>{% endif %}
+          {% if 'nationality' in selected_cols %}<td>{{ emp.nationality.name_ar if emp.nationality else '—' }}</td>{% endif %}
+          {% if 'supervision' in selected_cols %}<td>{{ emp.supervision_type or '—' }}</td>{% endif %}
+          {% if 'status'      in selected_cols %}<td>{{ emp.current_status.name_ar if emp.current_status else '—' }}</td>{% endif %}
+          {% if 'phone'       in selected_cols %}<td>{{ emp.phone or '—' }}</td>{% endif %}
+          {% if 'office'      in selected_cols %}<td>{{ emp.office.name if emp.office else '—' }}</td>{% endif %}
+          {% if 'att_group'   in selected_cols %}<td>{{ emp.attendance_group.name if emp.attendance_group else '—' }}</td>{% endif %}
+          {% if 'hire_date'   in selected_cols %}<td>{{ emp.hire_date or '—' }}</td>{% endif %}
+          {% if 'end_date'    in selected_cols %}<td>{{ emp.contract_end_date or '—' }}</td>{% endif %}
+          {% if 'kafala'      in selected_cols %}<td>{{ emp.kafala or '—' }}</td>{% endif %}
+          {% if 're_code'     in selected_cols %}<td>{{ emp.re_code or '—' }}</td>{% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="background:#f1f5f9">
+          <td colspan="{{ selected_cols|length + 2 }}" class="fw-bold">الإجمالي: {{ employees | length }} موظف</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-warning mt-2">لا توجد نتائج مطابقة للفلاتر المحددة.</div>
+  {% endif %}
+
+  {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

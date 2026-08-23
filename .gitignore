@@ -1,0 +1,15 @@
+# SQLite dev database (generated at runtime by import_excel.py)
+instance/
+*.db
+
+# Environment / secrets — never commit
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp Excel copies created by load_copy()
+*.tmp.xlsx

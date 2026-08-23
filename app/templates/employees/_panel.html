@@ -1,0 +1,17 @@
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <h6 class="mb-0">{{ emp.full_name }}</h6>
+  <a href="/employees/{{ emp.id }}" class="btn btn-sm btn-outline-primary">الملف</a>
+</div>
+<table class="table table-sm table-borderless">
+  <tr><td class="text-muted small">الوظيفة</td><td>{{ emp.job_code.title if emp.job_code else '—' }}</td></tr>
+  <tr><td class="text-muted small">المنطقة</td><td>{{ emp.region or '—' }}</td></tr>
+  <tr><td class="text-muted small">الراتب الشهري</td><td>{{ emp.unit_price or '—' }}</td></tr>
+  <tr><td class="text-muted small">الهاتف</td><td>{{ emp.phone or '—' }}</td></tr>
+  <tr><td class="text-muted small">الجنسية</td><td>{{ emp.nationality.name_ar if emp.nationality else '—' }}</td></tr>
+  <tr><td class="text-muted small">الكفالة</td><td>{{ emp.kafala or '—' }}</td></tr>
+  <tr><td class="text-muted small">الحالة</td><td>{{ emp.current_status.name_ar if emp.current_status else '—' }}</td></tr>
+  <tr><td class="text-muted small">تاريخ الالتحاق</td><td>{{ emp.hire_date or '—' }}</td></tr>
+</table>
+{% if current_user.role != 'viewer' %}
+<a href="/employees/{{ emp.id }}/edit" class="btn btn-sm btn-outline-secondary w-100 mt-2">تعديل</a>
+{% endif %}

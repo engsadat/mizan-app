@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>ميزان — إحصاءات الموظفين</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    body { font-family: 'Cairo', sans-serif; background: #f0f4f8; }
+    .kpi-card { background: #fff; border-radius: 12px; padding: 18px 22px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+    .kpi-val  { font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+    .kpi-lbl  { font-size: .82rem; color: #64748b; margin-top: 2px; }
+    .chart-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.07); display:flex; flex-direction:column; }
+    .card-title { font-size: .9rem; font-weight: 700; color: #0a1f3d; margin-bottom: 12px; border-right: 4px solid #0071b9; padding-right: 8px; }
+    .e-table th { background: #0a1f3d; color: #fff; font-size: .8rem; text-align: center; }
+    .e-table td { font-size: .82rem; vertical-align: middle; }
+    .e-table td.num { text-align: center; font-weight: 600; }
+    .e2-badge { background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 1px 8px; }
+    .e3-badge { background: #dcfce7; color: #166534; border-radius: 4px; padding: 1px 8px; }
+    .region-btn { border-radius: 20px; font-size: .82rem; padding: 3px 14px; }
+    .region-btn.active { background: #0a1f3d; color: #fff; border-color: #0a1f3d; }
+
+    /* Print */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .doc-header { display: block !important; }
+      canvas { max-width: 100% !important; }
+      .chart-card, .kpi-card { box-shadow: none; border: 1px solid #e2e8f0; }
+      .print-chart-wrap { height: 380px !important; }
+    }
+    .doc-header { display: none; }
+    .print-chart-wrap { position: relative; height: 220px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar mb-3 no-print" style="background:#0a1f3d">
+  <a href="/reports/" class="navbar-brand text-white px-3">← التقارير</a>
+  <span class="text-white px-3 fw-bold">إحصاءات الموظفين</span>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-light me-3 ms-auto">🖨 طباعة</button>
+</nav>
+
+<div class="container-fluid px-4 pb-4" style="max-width:1200px">
+
+  <!-- Print header -->
+  <div class="doc-header mb-3">
+    <div style="direction:ltr; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <img src="{{ logo_nwc }}" alt="NWC" style="height:50px; object-fit:contain;">
+      <div style="text-align:center; flex:1; padding:0 12px; font-size:9pt; font-weight:700; color:#0a1f3d; line-height:1.4">
+        اتفاقية الخدمات الهندسية والاستشارية لتقديم خدمات الإشراف<br>
+        على تنفيذ مشاريع المياه والصرف الصحي بالقطاع الجنوبي عقد (1)
+      </div>
+      <img src="{{ logo_alamro }}" alt="Al-Amro" style="height:50px; object-fit:contain;">
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #0071b9; padding-bottom:6px; margin-top:6px;">
+      <span></span>
+      <span style="font-size:11pt; font-weight:700; color:#0a1f3d;">إحصاءات الموظفين{% if selected_region %} — {{ selected_region }}{% endif %}</span>
+      <span style="font-size:8.5pt; color:#64748b;">{{ now }}</span>
+    </div>
+  </div>
+
+  <!-- Region filter -->
+  <div class="d-flex gap-2 flex-wrap mb-3 no-print">
+    <a href="/reports/emp-kpi" class="btn btn-sm btn-outline-secondary region-btn {% if not selected_region %}active{% endif %}">الكل</a>
+    {% for r in regions %}
+    <a href="/reports/emp-kpi?region={{ r }}" class="btn btn-sm btn-outline-secondary region-btn {% if selected_region == r %}active{% endif %}">{{ r }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#059669">{{ total_active }}</div>
+        <div class="kpi-lbl">على قوة العمل</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#0071b9">{{ saudi_count }}</div>
+        <div class="kpi-lbl">موظف سعودي</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#7c3aed">{{ non_saudi }}</div>
+        <div class="kpi-lbl">موظف غير سعودي</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:#d97706">{{ replacement_count }}</div>
+        <div class="kpi-lbl">بديل</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Region + Kafala -->
+  <div class="row g-3 mb-3 align-items-stretch">
+
+    <!-- Region bars -->
+    <div class="col-md-5 d-flex">
+      <div class="chart-card h-100 w-100">
+        <div class="card-title">توزيع العناصر على المناطق</div>
+        <div class="print-chart-wrap" style="margin-top:auto; margin-bottom:auto;"><canvas id="regionChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Kafala bars -->
+    <div class="col-md-7 d-flex">
+      <div class="chart-card h-100 w-100">
+        <div class="card-title text-center" style="border-right:none; border-bottom:3px solid #0071b9; padding-bottom:6px;">موقف العناصر من الكفالة</div>
+        <div class="print-chart-wrap" style="margin-top:auto; margin-bottom:auto;"><canvas id="kafalaChart"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Nationality + E2/E3 table -->
+  <div class="row g-3" style="page-break-before: always">
+
+    <!-- Nationality bars -->
+    <div class="col-md-5">
+      <div class="chart-card">
+        <div class="card-title">الجنسيات</div>
+        <div style="position:relative; height:220px"><canvas id="natChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- E2 / E3 table -->
+    <div class="col-md-7">
+      <div class="chart-card">
+        <div class="card-title">الوظائف — E2 و E3</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered e-table mb-0">
+            <thead>
+              <tr>
+                <th style="text-align:right">الوظيفة</th>
+                <th><span class="e2-badge">E2</span></th>
+                <th><span class="e3-badge">E3</span></th>
+                <th>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in e_table %}
+              <tr>
+                <td>{{ row.job }}</td>
+                <td class="num">{% if row.e2 %}<span class="e2-badge">{{ row.e2 }}</span>{% else %}—{% endif %}</td>
+                <td class="num">{% if row.e3 %}<span class="e3-badge">{{ row.e3 }}</span>{% else %}—{% endif %}</td>
+                <td class="num fw-bold">{{ row.total }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr style="background:#f1f5f9; font-weight:700">
+                <td>الإجمالي</td>
+                <td class="num">{{ e_table | sum(attribute='e2') }}</td>
+                <td class="num">{{ e_table | sum(attribute='e3') }}</td>
+                <td class="num">{{ e_table | sum(attribute='total') }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+const COLORS = ['#0071b9','#059669','#d97706','#7c3aed','#e11d48','#0891b2','#65a30d','#c026d3','#64748b'];
+
+const regionRaw = {{ region_data | safe }};
+const kafalaRaw = {{ kafala_data | safe }};
+const natRaw    = {{ nat_data    | safe }};
+
+function colChart(id, raw) {
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: {
+      labels: raw.map(d => d.name),
+      datasets: [{
+        data: raw.map(d => d.count),
+        backgroundColor: raw.map((_, i) => COLORS[i % COLORS.length]),
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} موظف` } },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          font: { family: 'Cairo', weight: 'bold', size: 12 },
+          color: '#0a1f3d',
+          formatter: v => v > 0 ? v : '',
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 11 } } },
+        y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Cairo' } }, beginAtZero: true }
+      },
+      layout: { padding: { top: 20 } }
+    }
+  });
+}
+
+colChart('regionChart', regionRaw);
+colChart('kafalaChart', kafalaRaw);
+colChart('natChart',    natRaw);
+</script>
+</body>
+</html>
