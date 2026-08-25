@@ -10,6 +10,8 @@ instance/
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
+venv/
 
 # Temp Excel copies created by load_copy()
 *.tmp.xlsx

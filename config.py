@@ -7,7 +7,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    HR_ROOT = Path(__file__).parent.parent
+    # Parent of mizan/ is HR/ (Excel source lives in HR/source/)
+    HR_ROOT = Path(__file__).resolve().parent.parent
 
 
 class DevelopmentConfig(Config):
@@ -22,7 +23,7 @@ class ProductionConfig(Config):
     WTF_CSRF_ENABLED = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
-        'sqlite:////home/southMizan/Claude-Projects/hr_webapp/instance/mizan.db'
+        'sqlite:///' + str(Path(__file__).resolve().parent / 'instance' / 'mizan.db').replace('\\', '/'),
     )
 
 
