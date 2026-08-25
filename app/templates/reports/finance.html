@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التقرير المالي الشامل — ميزان</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f0f4f8;
+      direction: rtl;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .toolbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: #0a1f3d; display: flex; align-items: center;
+      padding: 8px 16px; gap: 12px; direction: ltr;
+    }
+    .toolbar a, .toolbar button {
+      font-family: 'Cairo', sans-serif; font-size: 13px;
+      color: white; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+      border-radius: 6px; padding: 5px 14px; text-decoration: none; cursor: pointer;
+    }
+    .toolbar .spacer { flex: 1; }
+    .toolbar .label { color: rgba(255,255,255,.6); font-size: 12px; }
+
+    .page-wrap { padding-top: 48px; }
+
+    .page {
+      width: 297mm;
+      margin: 6mm auto;
+      padding: 5mm;
+      background: white;
+      box-shadow: 0 6px 40px rgba(0,46,91,.22);
+    }
+
+    /* Header */
+    .hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a1f3d;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      min-height: 50px;
+    }
+    .hdr img { height: 36px; background: white; border-radius: 4px; padding: 2px 6px; }
+    .hdr h1 { font-size: 0.9rem; font-weight: 700; flex: 1; text-align: center; line-height: 1.3; }
+
+    /* Section */
+    .section {
+      margin-bottom: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .section-title {
+      background: #003462;
+      color: white;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-right: 4px solid #d97706;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-body { padding: 10px; }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .kpi {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .kpi-h {
+      padding: 6px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      text-align: center;
+    }
+    .kpi-h.green { background: #166534; }
+    .kpi-h.amber { background: #d97706; }
+    .kpi-h.blue { background: #003462; }
+    .kpi-b {
+      padding: 8px;
+      text-align: center;
+    }
+    .kpi-v {
+      font-family: Arial, sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .kpi-s { font-size: 0.6rem; color: #6b7280; margin-top: 2px; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    thead tr { background: #003462; color: white; }
+    thead th {
+      padding: 6px 4px;
+      text-align: right;
+      font-weight: 600;
+      border-right: 1px solid rgba(255,255,255,.2);
+    }
+    tbody td {
+      padding: 4px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+    tbody td:first-child { text-align: right; }
+    .num { text-align: center; font-family: Arial; }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.amber { background: #fef9c3; color: #854d0e; }
+    .badge.gray { background: #f3f4f6; color: #374151; }
+
+    /* Job Row with Progress */
+    .job-row {
+      display: grid;
+      grid-template-columns: 30px 1fr 80px 80px 120px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.75rem;
+    }
+    .job-row:nth-child(odd) { background: #f8fafc; }
+    .progress-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      background: #166534;
+      transition: width 0.3s;
+    }
+    .progress-fill.amber { background: #f59e0b; }
+    .progress-fill.red { background: #ef4444; }
+
+    /* Error */
+    .error { background: #fee; border: 1px solid #fcc; color: #c00; padding: 10px; border-radius: 6px; margin: 20px; }
+
+    /* Print */
+    @page { size: A4 landscape; margin: 0; }
+    @media print {
+      .toolbar { display: none; }
+      .page-wrap { padding-top: 0; }
+      body { background: white; }
+      .page { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <a href="/reports">← التقارير</a>
+  <span class="label">التقرير المالي الشامل</span>
+  <span class="spacer"></span>
+  <button onclick="setTimeout(()=>window.print(),200)">طباعة / PDF</button>
+</div>
+
+<div class="page-wrap">
+{% if error %}
+  <div class="error">
+    <strong>خطأ:</strong> {{ error }}
+  </div>
+{% else %}
+
+<div class="page">
+  <!-- Header -->
+  <div class="hdr">
+    {% if logo_alamro %}<img src="{{ logo_alamro }}" alt="Al-Amro">{% endif %}
+    <h1>التقرير المالي الشامل — المستخلصات وأوامر الشراء<br>
+      <span style="font-size:0.7rem;opacity:.8">القطاع الجنوبي — اتفاقية الخدمات الهندسية والاستشارية</span></h1>
+    {% if logo_nwc %}<img src="{{ logo_nwc }}" alt="NWC">{% endif %}
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: VARIATION ORDER (PO 6) — FIRST -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      🟠 أمر التغيير — أوامر الشراء 6
+      <span class="badge amber" style="margin-right:auto">جارٍ ⏳</span>
+    </div>
+    <div class="section-body">
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-h blue">قيمة أمر التغيير</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#003462">{{ "{:,.0f}".format(kpis_var.allocated) }}</div>
+          <div class="kpi-s">ريال سعودي</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-h amber">منصرف حتى الآن</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#d97706">{{ "{:,.0f}".format(kpis_var.disbursed) }}</div>
+          <div class="kpi-s">من المستخلصات</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-h green">المتبقي تحت التنفيذ</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#166534">{{ "{:,.0f}".format(kpis_var.remaining) }}</div>
+          <div class="kpi-s">في الطريق</div></div>
+        </div>
+      </div>
+
+      <!-- Variation Invoices Table -->
+      {% if var_invoices %}
+      <strong style="font-size:0.8rem">جدول المستخلصات (مستخلص 27_D فما بعده):</strong>
+      <table style="margin-top:4px;font-size:0.7rem">
+        <thead><tr>
+          <th>#</th><th>المستخلص</th><th>PO</th><th>الشهر</th><th>الإجمالي</th><th>خصم 10%</th><th>الضريبة</th><th>الصافي</th><th>الحالة</th>
+        </tr></thead>
+        <tbody>
+          {% for inv in var_invoices %}
+          <tr style="background:{% if loop.index % 2 == 0 %}#f8fafc{% else %}#fff{% endif %}">
+            <td class="num gray" style="font-size:0.65rem">{{ loop.index }}</td>
+            <td style="text-align:right">{{ inv.label }}</td>
+            <td class="num" style="color:#0071b9;font-weight:700">PO{{ inv.po }}</td>
+            <td class="num">{{ inv.month }}</td>
+            <td class="num" style="color:#d97706;font-weight:600">{{ "{:,.0f}".format(inv.gross) }}</td>
+            <td class="num" style="color:#c00000">{% if inv.ret10 %}{{ "{:,.0f}".format(inv.ret10) }}{% else %}—{% endif %}</td>
+            <td class="num gray">{{ "{:,.0f}".format(inv.vat) }}</td>
+            <td class="num" style="color:#002060;font-weight:700">{{ "{:,.0f}".format(inv.total) }}</td>
+            <td style="text-align:center">
+              {% if 'جاري' in inv.status %}
+                <span class="badge amber">جاري الاعتماد</span>
+              {% else %}
+                <span class="badge gray">{{ inv.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      <!-- PO 6 Jobs Breakdown -->
+      {% if po6_jobs %}
+      <strong style="font-size:0.8rem;margin-top:8px;display:block">تفاصيل العناصر والوظائف:</strong>
+      <div style="margin-top:6px">
+        {% for job in po6_jobs %}
+          {% if job.var_budget > 0 or job.cum_total > 0 %}
+          <div class="job-row">
+            <div style="text-align:center;font-weight:700">{{ job.no }}</div>
+            <div style="text-align:right">{{ job.desc }}</div>
+            <div class="num">{{ "{:,.0f}".format(job.var_budget) }}</div>
+            <div class="num">{{ "{:,.0f}".format(job.cum_total) }}</div>
+            <div>
+              <div class="progress-bar">
+                <div class="progress-fill {% if job.pct_complete >= 85 %}red{% elif job.pct_complete >= 60 %}amber{% endif %}"
+                     style="width:{{ [job.pct_complete, 100] | min }}%">
+                  {{ "%.0f%%"|format(job.pct_complete) }}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: ORIGINAL CONTRACT (PO 1-5) — SECOND -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      🟢 العقد الأصلي — أوامر الشراء 1-5
+      <span class="badge green" style="margin-right:auto">مُنتهٍ ✅</span>
+    </div>
+    <div class="section-body">
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-h blue">قيمة العقد</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#003462">{{ "{:,.0f}".format(kpis_orig.allocated) }}</div>
+          <div class="kpi-s">ريال سعودي</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-h green">إجمالي المصروف</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#166534">{{ "{:,.0f}".format(kpis_orig.disbursed) }}</div>
+          <div class="kpi-s">تم الصرف بالكامل</div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-h amber">المتبقي</div>
+          <div class="kpi-b"><div class="kpi-v" style="color:#d97706">{{ "{:,.0f}".format(kpis_orig.remaining) }}</div>
+          <div class="kpi-s">غير مستخدم</div></div>
+        </div>
+      </div>
+
+      <!-- PO Distribution Table -->
+      <strong style="font-size:0.8rem">توزيع أوامر الشراء:</strong>
+      <table style="margin-top:6px">
+        <thead><tr><th>أمر الشراء</th><th>المبلغ المخصص</th><th>الحالة</th></tr></thead>
+        <tbody>
+          {% for po in po_list %}
+          <tr>
+            <td style="font-weight:700;color:#0071b9">{{ po.name }}</td>
+            <td class="num">{{ "{:,.0f}".format(po.amount) }}</td>
+            <td><span class="badge green">تم الصرف</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Original Invoices Table -->
+      {% if orig_invoices %}
+      <strong style="font-size:0.8rem;margin-top:8px;display:block">جدول المستخلصات (مستخلص 1 → 27_C):</strong>
+      <table style="margin-top:4px;font-size:0.7rem">
+        <thead><tr>
+          <th>#</th><th>المستخلص</th><th>PO</th><th>الشهر</th><th>الإجمالي</th><th>خصم 10%</th><th>الضريبة</th><th>الصافي</th><th>الحالة</th>
+        </tr></thead>
+        <tbody>
+          {% for inv in orig_invoices %}
+          <tr style="background:{% if loop.index % 2 == 0 %}#f8fafc{% else %}#fff{% endif %}">
+            <td class="num gray" style="font-size:0.65rem">{{ loop.index }}</td>
+            <td style="text-align:right">{{ inv.label }}</td>
+            <td class="num" style="color:#0071b9;font-weight:700">PO{{ inv.po }}</td>
+            <td class="num">{{ inv.month }}</td>
+            <td class="num" style="color:#003462;font-weight:600">{{ "{:,.0f}".format(inv.gross) }}</td>
+            <td class="num" style="color:#c00000">{% if inv.ret10 %}{{ "{:,.0f}".format(inv.ret10) }}{% else %}—{% endif %}</td>
+            <td class="num gray">{{ "{:,.0f}".format(inv.vat) }}</td>
+            <td class="num" style="color:#002060;font-weight:700">{{ "{:,.0f}".format(inv.total) }}</td>
+            <td style="text-align:center">
+              {% if 'تم الصرف' in inv.status or inv.status == 'paid' %}
+                <span class="badge green">تم الصرف</span>
+              {% elif 'جاري' in inv.status %}
+                <span class="badge amber">جاري</span>
+              {% else %}
+                <span class="badge gray">{{ inv.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;font-size:0.7rem;color:#666;margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb">
+    مكتب العمرو للاستشارات الهندسية | التقرير المالي الشامل | القطاع الجنوبي
+  </div>
+</div>
+
+{% endif %}
+</div>
+
+</body>
+</html>

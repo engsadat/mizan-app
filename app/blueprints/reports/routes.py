@@ -256,3 +256,172 @@ def emp_dashboard():
         logo_alamro=logo_alamro,
         logo_nwc=logo_nwc,
     )
+
+
+@reports_bp.route('/finance')
+@login_required
+def finance():
+    """Finance report: Complete PO, Invoices, and Variation Orders breakdown."""
+    try:
+        import openpyxl, shutil, os
+        from pathlib import Path
+
+        # Data sources
+        PO_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\Dell_5066\04_Dell_Inv\2025\PO 1_2_3_4\tot PO.xlsx')
+        PRO2 = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\Inv_Data_total for ai pro2.xlsx')
+        PO6_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\2026_PO6for ai_.xlsx')
+        VAR_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\PO_2026.xlsx')
+
+        ORIG_CONTRACT = 126_000_000
+        EXT_CONTRACT = 305_111_979
+        VAR_VALUE = EXT_CONTRACT - ORIG_CONTRACT
+
+        def load_copy(path):
+            if not path.exists():
+                return None
+            tmp = str(path) + ".tmp.xlsx"
+            shutil.copy2(str(path), tmp)
+            wb = openpyxl.load_workbook(tmp, data_only=True)
+            os.remove(tmp)
+            return wb
+
+        def sv(v):
+            if v is None: return ''
+            return str(v).strip()
+
+        def fmt(n):
+            try:
+                return f"{float(n):,.0f}"
+            except:
+                return '—'
+
+        # ── PO 1-5 ────────────────────────────────────────────────────────────────
+        po_list = []
+        wb_po = load_copy(PO_FILE)
+        if wb_po:
+            ws_po = wb_po['Sheet1']
+            for r in ws_po.iter_rows(min_row=2, max_row=6, values_only=True):
+                if r and r[1] and 'PO' in str(r[1]):
+                    po_list.append({
+                        'name': sv(r[1]),
+                        'amount': float(r[0] or 0)
+                    })
+
+        # ── Invoices (split: original vs variation) ────────────────────────────────
+        orig_invoices = []
+        var_invoices = []
+        wb2 = load_copy(PRO2)
+        if wb2:
+            try:
+                ws2 = wb2['إجمالي المستخلصات_']
+            except:
+                ws2 = wb2.active
+
+            for r in ws2.iter_rows(min_row=5, max_row=61, values_only=True):
+                if not r or not r[0]: continue
+                label = sv(r[0])
+                if 'مستخلص' not in label: continue
+
+                po_no = r[1] if len(r) > 1 else None
+                month = sv(r[2]) if len(r) > 2 else ''
+                gross = float(r[3] or 0) if len(r) > 3 else 0
+                ret10 = float(r[4] or 0) if len(r) > 4 and r[4] else 0
+                vat = float(r[6] or 0) if len(r) > 6 and r[6] else 0
+                total = float(r[7] or 0) if len(r) > 7 and r[7] else gross
+                status = sv(r[10]) if len(r) > 10 else ''
+
+                inv = {
+                    'label': label,
+                    'po': po_no,
+                    'month': month,
+                    'gross': gross,
+                    'ret10': ret10,
+                    'vat': vat,
+                    'total': total,
+                    'status': status
+                }
+
+                if po_no == 6:
+                    var_invoices.append(inv)
+                else:
+                    orig_invoices.append(inv)
+
+        orig_total = sum(i['gross'] for i in orig_invoices)
+        var_total = sum(i['gross'] for i in var_invoices)
+        var_remaining = VAR_VALUE - var_total
+
+        # ── PO6 Job Details ───────────────────────────────────────────────────────
+        po6_jobs = []
+        wb6 = load_copy(PO6_FILE)
+        if wb6:
+            try:
+                ws6 = wb6['ToTal_From PO_6_underway']
+            except:
+                ws6 = wb6.active
+
+            for r in ws6.iter_rows(min_row=6, max_row=35, values_only=True):
+                if r and r[0] is not None and isinstance(r[0], int):
+                    po6_jobs.append({
+                        'no': int(r[0]),
+                        'desc': sv(r[1]) if len(r) > 1 else '',
+                        'unit_price': float(r[3] or 0) if len(r) > 3 else 0,
+                        'persons': float(r[4] or 0) if len(r) > 4 else 0,
+                        'contract_months': float(r[5] or 0) if len(r) > 5 else 0,
+                        'contract_qty': float(r[6] or 0) if len(r) > 6 else 0,
+                        'contract_total': float(r[7] or 0) if len(r) > 7 else 0,
+                        'cum_qty': float(r[10] or 0) if len(r) > 10 else 0,
+                        'cum_total': float(r[11] or 0) if len(r) > 11 else 0,
+                    })
+
+        # ── Variation Budget per Job ──────────────────────────────────────────────
+        var_budget = {}
+        wb_var = load_copy(VAR_FILE)
+        if wb_var:
+            try:
+                ws_var = wb_var['1']
+            except:
+                ws_var = wb_var.active
+
+            for r in ws_var.iter_rows(min_row=3, max_row=32, values_only=True):
+                if r and r[0] and isinstance(r[0], int):
+                    orig_v = float(r[7] or 0) if len(r) > 7 else 0
+                    amend_v = float(r[11] or 0) if len(r) > 11 else 0
+                    var_budget[int(r[0])] = max(amend_v - orig_v, 0)
+
+        # Enrich PO6 jobs with variation budget
+        for job in po6_jobs:
+            job['var_budget'] = var_budget.get(job['no'], 0)
+            job['var_remaining'] = max(job['var_budget'] - job['cum_total'], 0)
+            job['pct_complete'] = (job['cum_total'] / job['var_budget'] * 100) if job['var_budget'] > 0 else 0
+
+        # ── Summary Data ───────────────────────────────────────────────────────────
+        po_total_allocated = sum(p['amount'] for p in po_list)
+        po_total_disbursed = orig_total
+
+        return render_template(
+            'reports/finance.html',
+            po_list=po_list,
+            orig_invoices=orig_invoices,
+            var_invoices=var_invoices,
+            po6_jobs=po6_jobs,
+            kpis_orig={
+                'allocated': po_total_allocated,
+                'disbursed': po_total_disbursed,
+                'remaining': po_total_allocated - po_total_disbursed,
+            },
+            kpis_var={
+                'allocated': VAR_VALUE,
+                'disbursed': var_total,
+                'remaining': var_remaining,
+            },
+            logo_nwc=_b64_logo('NWC_Logo.png'),
+            logo_alamro=_b64_logo('Alamro_Logo.png'),
+        )
+
+    except Exception as e:
+        import traceback
+        return render_template('reports/finance.html',
+                              error=str(e),
+                              traceback=traceback.format_exc(),
+                              logo_nwc=_b64_logo('NWC_Logo.png'),
+                              logo_alamro=_b64_logo('Alamro_Logo.png'))
