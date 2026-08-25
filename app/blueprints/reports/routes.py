@@ -265,12 +265,14 @@ def finance():
     try:
         import openpyxl, shutil, os
         from pathlib import Path
+        from flask import current_app
 
-        # Data sources
-        PO_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\Dell_5066\04_Dell_Inv\2025\PO 1_2_3_4\tot PO.xlsx')
-        PRO2 = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\Inv_Data_total for ai pro2.xlsx')
-        PO6_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\2026_PO6for ai_.xlsx')
-        VAR_FILE = Path(r'C:\Users\engsa\OneDrive\Desktop\AI\HR\Invoices\PO_2026.xlsx')
+        # Data sources from config (supports both local paths and environment overrides)
+        config = current_app.config
+        PO_FILE = Path(config['EXCEL_SOURCES']['po_master'])
+        PRO2 = Path(config['EXCEL_SOURCES']['invoices'])
+        PO6_FILE = Path(config['EXCEL_SOURCES']['po6_detail'])
+        VAR_FILE = Path(config['EXCEL_SOURCES']['variations'])
 
         ORIG_CONTRACT = 126_000_000
         EXT_CONTRACT = 305_111_979

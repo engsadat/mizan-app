@@ -7,8 +7,19 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    # Parent of mizan/ is HR/ (Excel source lives in HR/source/)
-    HR_ROOT = Path(__file__).resolve().parent.parent
+
+    # Paths
+    PROJECT_ROOT = Path(__file__).resolve().parent
+    HR_ROOT = PROJECT_ROOT.parent
+    DATA_FOLDER = PROJECT_ROOT / 'data'
+
+    # Excel data sources (can be overridden by environment variables)
+    EXCEL_SOURCES = {
+        'po_master': os.environ.get('EXCEL_PO_MASTER') or str(DATA_FOLDER / 'po_master.xlsx'),
+        'invoices': os.environ.get('EXCEL_INVOICES') or str(DATA_FOLDER / 'invoices.xlsx'),
+        'po6_detail': os.environ.get('EXCEL_PO6') or str(DATA_FOLDER / 'po6_detail.xlsx'),
+        'variations': os.environ.get('EXCEL_VARIATIONS') or str(DATA_FOLDER / 'variations.xlsx'),
+    }
 
 
 class DevelopmentConfig(Config):

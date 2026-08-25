@@ -128,3 +128,49 @@ class EmployeeStatusHistory(db.Model):
     reason      = db.Column(db.Text)
     recorded_by = db.Column(db.String(200))
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ── Finance Data Models (from Excel sources) ──────────────────────────────────
+
+class FinancePO(db.Model):
+    """Purchase Order data (PO 1-6)."""
+    __tablename__ = 'finance_po'
+    id = db.Column(db.Integer, primary_key=True)
+    po_number = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    allocated_amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50), default='active')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class FinanceInvoice(db.Model):
+    """Invoice/Extract data."""
+    __tablename__ = 'finance_invoice'
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_label = db.Column(db.String(50), nullable=False)
+    po_number = db.Column(db.Integer, nullable=False, index=True)
+    month = db.Column(db.String(50))
+    gross_amount = db.Column(db.Float, default=0)
+    retention_10 = db.Column(db.Float, default=0)
+    vat_amount = db.Column(db.Float, default=0)
+    net_amount = db.Column(db.Float, default=0)
+    status = db.Column(db.String(100))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class FinancePO6Job(db.Model):
+    """PO 6 job breakdown and variation budget."""
+    __tablename__ = 'finance_po6_job'
+    id = db.Column(db.Integer, primary_key=True)
+    job_no = db.Column(db.Integer, nullable=False, index=True)
+    description = db.Column(db.String(500))
+    unit_price = db.Column(db.Float, default=0)
+    persons = db.Column(db.Float, default=0)
+    contract_months = db.Column(db.Float, default=0)
+    contract_qty = db.Column(db.Float, default=0)
+    contract_total = db.Column(db.Float, default=0)
+    cumulative_qty = db.Column(db.Float, default=0)
+    cumulative_total = db.Column(db.Float, default=0)
+    variation_budget = db.Column(db.Float, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
