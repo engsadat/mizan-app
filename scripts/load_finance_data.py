@@ -68,7 +68,7 @@ def load_po_data(excel_path):
             count += 1
 
     db.session.commit()
-    print(f"  ✓ Loaded {count} purchase orders")
+    print(f"  [OK] Loaded {count} purchase orders")
 
 
 def load_invoice_data(excel_path):
@@ -107,7 +107,7 @@ def load_invoice_data(excel_path):
         count += 1
 
     db.session.commit()
-    print(f"  ✓ Loaded {count} invoices")
+    print(f"  [OK] Loaded {count} invoices")
 
 
 def load_po6_jobs(excel_path, variations_path):
@@ -147,7 +147,7 @@ def load_po6_jobs(excel_path, variations_path):
             count += 1
 
     db.session.commit()
-    print(f"  ✓ Loaded {count} PO 6 jobs with variation budgets")
+    print(f"  [OK] Loaded {count} PO 6 jobs with variation budgets")
 
 
 def main():
@@ -155,9 +155,14 @@ def main():
     app = create_app('development')
 
     with app.app_context():
-        print("\n📊 Loading Finance Report data from Excel sources...\n")
+        print("\n[LOAD] Finance Report data from Excel sources...\n")
 
         try:
+            # Create tables if they don't exist
+            print("  Creating tables...")
+            db.create_all()
+            print("  [OK] Tables created\n")
+
             sources = app.config['EXCEL_SOURCES']
 
             # Clear existing data
@@ -166,19 +171,19 @@ def main():
             db.session.query(FinanceInvoice).delete()
             db.session.query(FinancePO6Job).delete()
             db.session.commit()
-            print("  ✓ Cleared\n")
+            print("  [OK] Cleared\n")
 
             # Load all data
             load_po_data(sources['po_master'])
             load_invoice_data(sources['invoices'])
             load_po6_jobs(sources['po6_detail'], sources['variations'])
 
-            print("\n✅ Finance data loaded successfully!\n")
+            print("\n[OK] Finance data loaded successfully!\n")
             print("Reports now read from database (fast, cached) instead of Excel.")
             print("To refresh data: python scripts/load_finance_data.py\n")
 
         except Exception as e:
-            print(f"\n❌ Error loading data: {e}\n")
+            print(f"\n[ERROR] Error loading data: {e}\n")
             raise
 
 

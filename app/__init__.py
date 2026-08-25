@@ -16,10 +16,10 @@ login_manager.login_message_category = 'warning'
 def create_app(test_config=None):
     app = Flask(__name__)
 
-    if test_config:
+    if test_config and isinstance(test_config, dict):
         app.config.from_mapping(test_config)
     else:
-        env = os.environ.get('FLASK_ENV', 'development')
+        env = test_config if isinstance(test_config, str) else os.environ.get('FLASK_ENV', 'development')
         app.config.from_object(config[env])
 
     db.init_app(app)
