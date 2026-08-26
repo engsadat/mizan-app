@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>ميزان — لوحة المشاريع (معاينة)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+body { font-family: Cairo, sans-serif; background:#f0f4f8; margin:0; color:#0a1f3d; }
+.nav { background:#0a1f3d; color:#fff; padding:12px 20px; font-weight:700; }
+.wrap { max-width:1100px; margin:0 auto; padding:20px; }
+.note { color:#64748b; font-size:.85rem; margin:8px 0 16px; }
+.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+.kpi { background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+.kpi b { display:block; font-size:1.55rem; }
+.kpi span { color:#64748b; font-size:.8rem; }
+.charts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.card { background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+.card h2 { font-size:.9rem; margin:0 0 10px; border-right:4px solid #0071b9; padding-right:8px; }
+.chart-box { height:240px; }
+.wide { margin-top:12px; }
+table { width:100%; border-collapse:collapse; font-size:.82rem; }
+th { background:#0a1f3d; color:#fff; padding:8px; text-align:center; }
+td { border:1px solid #e2e8f0; padding:7px 8px; }
+td.num { text-align:center; font-family:Arial,sans-serif; }
+.fw { font-weight:700; }
+.foot { color:#64748b; font-size:.75rem; margin-top:16px; }
+@media (max-width:800px) {
+  .kpis, .charts { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="nav">ميزان — لوحة مشاريع القطاع الجنوبي</div>
+<div class="wrap">
+  <p class="note">المشاريع المدرجة من ورقة pro · 179 مشروع · القيمة 0 ر.س</p>
+  <div class="kpis">
+    <div class="kpi"><b style="color:#059669">179</b><span>مشاريع مدرجة</span></div>
+    <div class="kpi"><b>0 م</b><span>إجمالي القيمة</span></div>
+    <div class="kpi"><b style="color:#0071b9">0%</b><span>متوسط الإنجاز الفعلي</span></div>
+    <div class="kpi"><b style="color:#d97706">0</b><span>متأخر عن المخطط</span></div>
+  </div>
+  <div class="charts">
+    <div class="card"><h2>القيمة حسب المنطقة</h2><div class="chart-box"><canvas id="c1"></canvas></div></div>
+    <div class="card"><h2>عدد المشاريع حسب الحالة</h2><div class="chart-box"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="card wide"><h2>الإنجاز المخطط مقابل الفعلي حسب المنطقة</h2>
+    <div class="chart-box"><canvas id="c3"></canvas></div>
+  </div>
+  <div class="card wide">
+    <h2>القيمة حسب الحالة والمنطقة (ر.س)</h2>
+    <table>
+      <thead><tr><th style="text-align:right">حالة المشروع</th>
+      <th>إيرادات الشركة</th><th>المشاريع الملحة</th><th>عامة</th><th>على حساب جهات أخرى ( حكومية / خاصة)</th><th>غير محدد</th><th>مبادرات</th><th>مشاريع الحزمة الأولى</th><th>مشاريع الحزمة الاولى</th><th>مشاريع المدن الساحلية</th>
+      <th>الإجمالي</th></tr></thead>
+      <tbody>
+        <tr><td>غير محدد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>احمد محمد عبدالماجد احمد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>هشام عبد العظيم محمد صالح</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>مؤمن عادل السيد علام</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>احمد صالح عبده</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>نزار أحمد إدريس محمد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد علي طوسون</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمود مصطفي حسن عيد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>أحمد سامي عقل</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>أحمد محمد سعد عبد القادر</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>عدلي عزت عبدالعظيم ربيع</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>عصام احمد محمود الدكروري</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>علي سعد احمد الكومي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>عمرو فوزي السيد كيلاني</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>عصام محمود سامي مرسي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>حسني عبدالغفار محمد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد ياسين محمد جاب الله</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمود عطيتو محمد محمود</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد مصطفى محمود</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد محمود وجدي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>هيثم عبدالمحسن القصبي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>الصادق الأمين فرح</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>ناجي محمد جبارة أحمد</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد مسعد يسن إبراهيم</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>احمد جودة محمد إبراهيم</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>بدر محمد عبدالله</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>منتصر عباس مختار الشيخ</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>خليل أحمد الدميري</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>محمد عبد السلام حسين الطنطاوي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr><tr><td>معتز محمود قاسم</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num fw">0</td></tr>
+        <tr class="fw" style="background:#f1f5f9"><td>الإجمالي</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td>
+        <td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card wide">
+    <h2>التصنيف</h2>
+    <table>
+      <thead><tr><th style="text-align:right">التصنيف</th><th>العدد</th></tr></thead>
+      <tbody><tr><td>شركة الكبريش للاستثمار والمقاولات</td><td class="num">9</td></tr><tr><td>مؤسسة العرض الانشائي للمقاولات</td><td class="num">9</td></tr><tr><td>شركة مناحي حمد مرعي الشهراني للمقاولات</td><td class="num">8</td></tr><tr><td>مؤسسة بكري احمد حسن آل صعب للمقاولات</td><td class="num">7</td></tr><tr><td>مؤسسة سدرة العصرية للمقاولات</td><td class="num">6</td></tr><tr><td>شركة أصول البناء للتجارة والمقاولات المحدودة</td><td class="num">5</td></tr><tr><td>شركة نبراس المتحدة للمقاولات العامة</td><td class="num">5</td></tr><tr><td>شركة المسار الحديث المحدودة</td><td class="num">5</td></tr><tr><td>شركة البنايات العربية</td><td class="num">5</td></tr><tr><td>شركة رابكو للمقاولات والخدمات الصناعية</td><td class="num">5</td></tr></tbody>
+    </table>
+  </div>
+  <p class="foot">ملف مستقل للمعاينة فقط. بعد الموافقة تُنقل اللوحة إلى تطبيق ميزان ثم git.</p>
+</div>
+<script>
+Chart.register(ChartDataLabels);
+const NAVY = '#0a1f3d', TEAL = '#0071b9', AMBER = '#d97706';
+const STATUS = {"جارٍ": "#0071b9", "مكتمل": "#059669", "متعثر": "#b91c1c", "لم يبدأ": "#7c3aed", "غير محدد": "#64748b"};
+const regionRaw = [{"name": "إيرادات الشركة", "value": 0.0}, {"name": "المشاريع الملحة", "value": 0.0}, {"name": "عامة", "value": 0.0}, {"name": "على حساب جهات أخرى ( حكومية / خاصة)", "value": 0.0}, {"name": "غير محدد", "value": 0.0}, {"name": "مبادرات", "value": 0.0}, {"name": "مشاريع الحزمة الأولى", "value": 0.0}, {"name": "مشاريع الحزمة الاولى", "value": 0.0}, {"name": "مشاريع المدن الساحلية", "value": 0.0}];
+const statusRaw = [{"name": "غير محدد", "count": 6}, {"name": "احمد محمد عبدالماجد احمد", "count": 10}, {"name": "هشام عبد العظيم محمد صالح", "count": 5}, {"name": "مؤمن عادل السيد علام", "count": 4}, {"name": "احمد صالح عبده", "count": 7}, {"name": "نزار أحمد إدريس محمد", "count": 4}, {"name": "محمد علي طوسون", "count": 5}, {"name": "محمود مصطفي حسن عيد", "count": 5}, {"name": "أحمد سامي عقل", "count": 12}, {"name": "أحمد محمد سعد عبد القادر", "count": 7}, {"name": "عدلي عزت عبدالعظيم ربيع", "count": 9}, {"name": "عصام احمد محمود الدكروري", "count": 5}, {"name": "علي سعد احمد الكومي", "count": 3}, {"name": "عمرو فوزي السيد كيلاني", "count": 6}, {"name": "عصام محمود سامي مرسي", "count": 5}, {"name": "حسني عبدالغفار محمد", "count": 6}, {"name": "محمد ياسين محمد جاب الله", "count": 5}, {"name": "محمود عطيتو محمد محمود", "count": 6}, {"name": "محمد مصطفى محمود", "count": 8}, {"name": "محمد محمود وجدي", "count": 8}, {"name": "هيثم عبدالمحسن القصبي", "count": 6}, {"name": "الصادق الأمين فرح", "count": 6}, {"name": "ناجي محمد جبارة أحمد", "count": 5}, {"name": "محمد مسعد يسن إبراهيم", "count": 6}, {"name": "احمد جودة محمد إبراهيم", "count": 5}, {"name": "بدر محمد عبدالله", "count": 6}, {"name": "منتصر عباس مختار الشيخ", "count": 6}, {"name": "خليل أحمد الدميري", "count": 8}, {"name": "محمد عبد السلام حسين الطنطاوي", "count": 4}, {"name": "معتز محمود قاسم", "count": 1}];
+const progressRaw = [{"name": "إيرادات الشركة", "planned": 0.0, "actual": 0.0}, {"name": "المشاريع الملحة", "planned": 0.0, "actual": 0.0}, {"name": "عامة", "planned": 0.0, "actual": 0.0}, {"name": "على حساب جهات أخرى ( حكومية / خاصة)", "planned": 0.0, "actual": 0.0}, {"name": "غير محدد", "planned": 0.0, "actual": 0.0}, {"name": "مبادرات", "planned": 0.0, "actual": 0.0}, {"name": "مشاريع الحزمة الأولى", "planned": 0.0, "actual": 0.0}, {"name": "مشاريع الحزمة الاولى", "planned": 0.0, "actual": 0.0}, {"name": "مشاريع المدن الساحلية", "planned": 0.0, "actual": 0.0}];
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: { labels: regionRaw.map(d => d.name),
+    datasets: [{ data: regionRaw.map(d => d.value), backgroundColor: NAVY, borderRadius: 5 }] },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      datalabels: { anchor:'end', align:'end', color: NAVY,
+        font: { family:'Cairo', weight:'bold', size:11 },
+        formatter: v => v ? (v/1e6).toFixed(0)+'م' : '' } },
+    scales: { x: { grid: { display:false }, ticks: { font: { family:'Cairo' } } },
+              y: { beginAtZero:true, ticks: { callback: v => (v/1e6).toFixed(0)+'م' }, grid: { color:'#f1f5f9' } } },
+    layout: { padding: { top: 18 } } }
+});
+new Chart(document.getElementById('c2'), {
+  type: 'bar',
+  data: { labels: statusRaw.map(d => d.name),
+    datasets: [{ data: statusRaw.map(d => d.count),
+      backgroundColor: statusRaw.map(d => STATUS[d.name] || TEAL), borderRadius: 5 }] },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      datalabels: { anchor:'end', align:'end', color: NAVY,
+        font: { family:'Cairo', weight:'bold', size:12 }, formatter: v => v || '' } },
+    scales: { x: { grid: { display:false }, ticks: { font: { family:'Cairo' } } },
+              y: { beginAtZero:true, ticks: { stepSize: 1 }, grid: { color:'#f1f5f9' } } },
+    layout: { padding: { top: 18 } } }
+});
+new Chart(document.getElementById('c3'), {
+  type: 'bar',
+  data: { labels: progressRaw.map(d => d.name),
+    datasets: [
+      { label: 'مخطط', data: progressRaw.map(d => d.planned), backgroundColor: TEAL, borderRadius: 4 },
+      { label: 'فعلي', data: progressRaw.map(d => d.actual), backgroundColor: AMBER, borderRadius: 4 }
+    ] },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position:'top', labels: { font: { family:'Cairo' } } },
+      datalabels: { display: false } },
+    scales: { x: { grid: { display:false }, ticks: { font: { family:'Cairo' } } },
+              y: { beginAtZero:true, max: 110, ticks: { callback: v => v+'%' }, grid: { color:'#f1f5f9' } } } }
+});
+</script>
+</body>
+</html>

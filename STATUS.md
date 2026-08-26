@@ -14,9 +14,9 @@ Do not save status to a Claude memo.
 
 ## Code
 
-- Canonical: `engsadat/mizan-app` `master` @ `aba2eb8` (2026-08-26, org chart integration complete)
-- PythonAnywhere HEAD: `e90d900` (awaiting pull of latest commits)
-- GitHub master: `aba2eb8` (org chart landing, routes, PDF export routes, 4 region HTML files generated)
+- Canonical: `engsadat/mizan-app` `master` @ `e90d900` (2026-08-26, finance print fix + job codes script fix)
+- PythonAnywhere HEAD: `be4b590` (not yet pulled latest)
+- GitHub master: `e90d900` (finance report print layout + job code rates script fix)
 - Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
 ## Product (this version)
@@ -29,46 +29,50 @@ Reports: BI + filter + finance. No SCD, no V2, no second codebase.
 
 See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Projects Mizan PRs/branches. Close PR #2 without merging.
 
-## Latest work (2026-08-26, session 3 — org chart integration)
+## Latest work (2026-08-26, session 2)
 
-- Added Playwright to requirements.txt for PDF export capability
-- Created gen_org_charts.py script to generate 4 region org chart HTML files from database
-  - Loads 444 active employees from Employee model
-  - Filters by region (عسير, جازان, الباحة, نجران)
-  - Generates static HTML with employee listings and KPIs
-  - Output: app/static/org_charts/09_OrgChart_*.html (4 files)
-- Implemented 3 Flask routes in reports blueprint:
-  - `/reports/org-chart` — landing page with region cards
-  - `/reports/org-chart/<region>` — region org chart with PDF export button
-  - `/reports/org-chart/<region>/pdf` — PDF export via Playwright
-- Created 2 templates with toolbar, security measures (safe HTML injection)
-- Updated reports index with org chart card
-- All code pushed to GitHub: aba2eb8
+- Imported 227 projects from source Excel (project_2026_database_ver1_updated.xlsx)
+- Created Project model with 32 fields (coordinates, contract, status, RE, progress, facilities)
+- Built projects dashboard: `/reports/projects-dashboard`
+  - KPI cards for ongoing projects by region (MSAR format)
+  - Pivot tables: count and values by status × region
+  - Charts: ongoing projects breakdown by region
+  - Print/PDF support
+- Tested locally and on PA — both working
 
-## Org Chart Feature Complete ✓
+## Dashboard complete ✓
 
-Organizational Chart Integration (Tasks 12-14):
-- ✅ Task 12: Playwright added to requirements.txt and installed locally
-- ✅ Task 13: Local testing — gen_org_charts.py generates 4 region HTML files successfully
-- ⏳ Task 14: Deploy to PythonAnywhere (in progress)
-  - Code pushed to GitHub: aba2eb8
-  - Server pull requires manual intervention (SSH not configured on Windows laptop)
-  - Playwright browsers must be installed on server: `python -m playwright install chromium`
-  - Web app reload required after code pull
+Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-dashboard
+- KPI cards: total + 4 regions (تحت التنفيذ projects)
+- Pivot tables: count & values by status × region (all projects)
+- Charts: ongoing by region
+- Print/PDF support
 
-Live accessibility:
-- Landing page: `/reports/org-chart` (will redirect to login if not authenticated)
-- Region view: `/reports/org-chart/<region>` with PDF export button
-- PDF export: `/reports/org-chart/<region>/pdf`
+## Latest work (2026-08-26, session 3)
+
+**Org Chart Integration** — Implemented Tasks 1-7 of org chart generation:
+- Created `scripts/gen_org_charts.py` script that:
+  - Loads Flask app context and Mizan database models
+  - Reads active employees (status = 'على قوة العمل') from database
+  - Reads ongoing projects (project_state = 'تحت التنفيذ') from database
+  - Loads optional supporting Excel files (emp_sort.xlsx, Office-RE.xlsx)
+  - Generates 4 region-specific HTML org chart files
+  - Writes to app/static/org_charts/ with filenames 09-12_OrgChart_*.html
+
+HTML output features:
+- NWC + Al-Amro header with branding
+- KPI cards: employee count, project count per region
+- Employee cards: name, job title, RE code, direct manager, nationality
+- Project cards: name, contractor, RE code, dates, SAR value
+- RTL Arabic layout with Cairo font, responsive grid design
+- Print-friendly CSS media queries
+
+Script tested end-to-end with sample data:
+- 4 sample employees across 3 regions
+- 3 sample projects across 3 regions
+- All 4 org chart HTML files generated successfully
 
 ## Next (one task)
 
-After server deployment verification:
-1. SSH to server (or use PythonAnywhere bash console)
-2. Navigate to `/home/southMizan/mizan-app` and run: `git pull origin master`
-3. Install Playwright: `python -m playwright install chromium`
-4. Reload web app via PythonAnywhere dashboard
-5. Test: https://southmizan.pythonanywhere.com/reports/org-chart
-6. Verify PDF export works
-
-Once live verification complete, org chart feature is done.
+**Org Chart Integration Routes** — Build routes to serve org chart files via web interface and add to navigation.
+Or: **Database Population** — Import actual employee and project data, then run org chart script.

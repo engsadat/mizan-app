@@ -1,16 +1,12 @@
-import json, base64, re, logging
-import tempfile
-import os
+import json, base64, re
 from datetime import date
 from collections import Counter
 from pathlib import Path
-from flask import render_template, request, send_file, abort
+from flask import render_template, request
 from flask_login import login_required
 from app.blueprints.reports import reports_bp
 from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office, Project
 from app import db
-
-logger = logging.getLogger(__name__)
 
 REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
 REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
@@ -579,18 +575,15 @@ def org_chart_landing():
 def org_chart_view(region):
     """View org chart for a region."""
     if region not in ORG_CHART_REGION_MAP:
-        abort(404)
+        return render_template('error.html',
+                              message='منطقة غير صحيحة'), 404
 
     info = ORG_CHART_REGION_MAP[region]
     org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
-    org_charts_dir = Path(__file__).parent.parent.parent / 'static' / 'org_charts'
-
-    # Ensure path is within org_charts directory (defense in depth - Issue 2)
-    if not org_chart_file.resolve().parent == org_charts_dir.resolve():
-        abort(404)
 
     if not org_chart_file.exists():
-        abort(404)
+        return render_template('error.html',
+                              message='ملف الهيكل التنظيمي غير متوفر'), 404
 
     html_content = org_chart_file.read_text(encoding='utf-8')
 
@@ -603,36 +596,32 @@ def org_chart_view(region):
 @reports_bp.route('/org-chart/<region>/pdf')
 @login_required
 def org_chart_pdf(region):
-    """Export org chart for a region as PDF (A3 landscape)."""
+    """Export org chart as PDF."""
     if region not in ORG_CHART_REGION_MAP:
-        abort(404)
-
-    info = ORG_CHART_REGION_MAP[region]
-    org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
-    org_charts_dir = Path(__file__).parent.parent.parent / 'static' / 'org_charts'
-
-    # Ensure path is within org_charts directory (defense in depth)
-    if not org_chart_file.resolve().parent == org_charts_dir.resolve():
-        abort(404)
-
-    if not org_chart_file.exists():
-        abort(404)
+        return {'error': 'منطقة غير صحيحة'}, 404
 
     try:
         from playwright.sync_api import sync_playwright
-        import io
+        import tempfile
+        import os
+
+        info = ORG_CHART_REGION_MAP[region]
+        org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+
+        if not org_chart_file.exists():
+            return {'error': 'ملف الهيكل التنظيمي غير متوفر'}, 404
 
         html_content = org_chart_file.read_text(encoding='utf-8')
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as tmp:
-            tmp.write(html_content)
-            tmp_html_path = tmp.name
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as tmp_html:
+            tmp_html.write(html_content)
+            tmp_html_path = tmp_html.name
 
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch()
                 page = browser.new_page()
-                page.goto(f'file://{tmp_html_path}')
+                page.goto(f"file://{tmp_html_path}")
 
                 pdf_bytes = page.pdf(
                     format='A3',
@@ -642,22 +631,27 @@ def org_chart_pdf(region):
 
                 browser.close()
 
-                now = date.today().strftime('%Y-%m-%d')
-                pdf_filename = f"OrgChart_{info['ar']}_{now}.pdf"
+            os.unlink(tmp_html_path)
 
-                return send_file(
-                    io.BytesIO(pdf_bytes),
-                    as_attachment=True,
-                    download_name=pdf_filename,
-                    mimetype='application/pdf'
-                )
-        finally:
+            from flask import send_file
+            import io
+
+            now = date.today().strftime('%Y-%m-%d')
+            filename = f"OrgChart_{info['ar']}_{now}.pdf"
+
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        except Exception as e:
             if os.path.exists(tmp_html_path):
                 os.unlink(tmp_html_path)
+            raise
 
     except ImportError:
-        logger.error('Playwright not installed')
-        abort(503)
+        return {'error': 'Playwright غير متوفر. لا يمكن تصدير PDF'}, 503
     except Exception as e:
-        logger.exception(f'PDF generation failed for region {region}')
-        abort(500)
+        return {'error': f'خطأ في إنشاء PDF: {str(e)}'}, 500
