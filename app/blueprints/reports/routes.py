@@ -314,6 +314,7 @@ def projects_dashboard():
         regions=data['regions'],
         statuses=data['statuses'],
         pivot=data['pivot'],
+        region_totals=data['region_totals'],
         region_labels=json.dumps(region_labels, ensure_ascii=False),
         region_values=json.dumps(region_values),
         total_value=data['total_value'],
