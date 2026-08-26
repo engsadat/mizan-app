@@ -29,6 +29,17 @@ Reports: BI + filter + finance. No SCD, no V2, no second codebase.
 
 See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Projects Mizan PRs/branches. Close PR #2 without merging.
 
+## Latest work (2026-08-26, session 2)
+
+- Imported 227 projects from source Excel (project_2026_database_ver1_updated.xlsx)
+- Created Project model with 32 fields (coordinates, contract, status, RE, progress, facilities)
+- Built projects dashboard: `/reports/projects-dashboard`
+  - KPI cards for ongoing projects by region (MSAR format)
+  - Pivot tables: count and values by status × region
+  - Charts: ongoing projects breakdown by region
+  - Print/PDF support
+- Tested locally and on PA — both working
+
 ## Next (one task)
 
-Begin project data work. What's the first step? (data source import, schema design, UI, reporting?).
+Dashboard complete. What's next? (add more reports, export features, or other data work?)
