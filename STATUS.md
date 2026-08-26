@@ -15,8 +15,8 @@ Do not save status to a Claude memo.
 ## Code
 
 - Canonical: `engsadat/mizan-app` `master` @ `67504bf` (2026-08-25, finance report + Excel→DB load)
-- PythonAnywhere HEAD: `a7b43c8` (checked 2026-08-26)
-- GitHub master: `fa6c017` (login status update, not yet pulled on PA)
+- PythonAnywhere HEAD: `a7b43c8` (checked 2026-08-26, login confirmed working)
+- GitHub master: `0b6090c` (PA has not pulled recent STATUS updates)
 - Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
 ## Product (this version)
@@ -31,4 +31,4 @@ See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Proje
 
 ## Next (one task)
 
-1. Verify PA pulled latest commit (5a2cb62), confirm login still works, and update STATUS with PA SHA.
+1. Pull on PA (`git pull origin master`), reload app, then test all routes and report results.
