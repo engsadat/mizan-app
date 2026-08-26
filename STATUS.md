@@ -31,4 +31,4 @@ See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Proje
 
 ## Next (one task)
 
-1. Close PR #2 (SCD Type 2 / V2 models) on GitHub without merging — then delete branch `feature/mizan-v2-task2-sqlalchemy-models`.
+1. Verify PA pulled latest commit (5a2cb62), confirm login still works, and update STATUS with PA SHA.
