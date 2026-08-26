@@ -313,12 +313,23 @@ def _project_pivot_data():
 
     ongoing = [p for p in projects if state_of(p) == ONGOING_STATE]
     ongoing_kpis = []
+
+    # Add total card first
+    ongoing_kpis.append({
+        'region': 'الإجمالي',
+        'count': len(ongoing),
+        'msar': _msar(sum(p.value or 0 for p in ongoing)),
+        'is_total': True,
+    })
+
+    # Then add by region
     for rg in regions:
         rows = [p for p in ongoing if region_of(p) == rg]
         ongoing_kpis.append({
             'region': rg,
             'count': len(rows),
             'msar': _msar(sum(p.value or 0 for p in rows)),
+            'is_total': False,
         })
 
     return {

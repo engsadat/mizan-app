@@ -94,10 +94,10 @@
 
   <div class="kpi-grid">
     {% for k in ongoing_kpis %}
-    <div class="kpi">
-      <div class="kpi-h">{{ k.region }} — تحت التنفيذ</div>
+    <div class="kpi" {% if k.is_total %}style="background:#e8f4f8;border:2px solid #0071b9"{% endif %}>
+      <div class="kpi-h" {% if k.is_total %}style="background:#0071b9"{% endif %}>{{ k.region }} — تحت التنفيذ</div>
       <div class="kpi-b">
-        <div class="kpi-v" style="color:#0071b9">{{ k.count }}</div>
+        <div class="kpi-v" style="color:{% if k.is_total %}#0071b9{% else %}#0071b9{% endif %}">{{ k.count }}</div>
         <div class="kpi-s">مشروع</div>
         <div class="kpi-v" style="font-size:1.05rem;margin-top:6px">{{ "%.1f"|format(k.msar) }}</div>
         <div class="kpi-s">مليون ر.س</div>
