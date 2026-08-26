@@ -1,21 +1,35 @@
-# Mizan — current status (2026-08-25)
+# Mizan — current status (2026-08-26)
 
-Update this file at the end of a session. Next chat: `@mizan/STATUS.md` + one task.
+Update this file at the end of every session. Then `git commit` + `git push`.
+Next chat: open `mizan-app` → read `CLAUDE.md` + this file → **one** task.
+Do not save status to a Claude memo.
 
-## Live
-- https://southmizan.pythonanywhere.com
-- Code: `engsadat/mizan-app` @ `b02ef93` → server `/home/southMizan/mizan-app`
-- DB: `/home/southMizan/mizan-app/instance/mizan.db` (~320 KB, Excel import, not the old PA file)
-- Local: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracks `origin/master`
+## Live (checked 2026-08-26)
 
-## Product (do not expand)
-Three home cards: الموظفون، التقارير، الإعدادات. Settings = job codes + users. Roles: admin | editor | viewer. Login = `User.username`. No SCD, invoices, `/admin`, or `emp_id` login.
+- URL: https://southmizan.pythonanywhere.com — **up**
+- Login page: Arabic ميزان / المنطقة الجنوبية, CSRF on, session cookie Secure + HttpOnly + SameSite=Lax
+- `/` `/employees/` `/reports/` `/settings/` `/reports/finance` → redirect to `/auth/login` (routes exist)
+- Login with the old memo password (`admin` / value from Claude memo): **failed** (`بيانات خاطئة`)
+- Inside app (home cards, 575 employees, finance numbers): **not checked** (no working login from this session)
 
-## Do not touch
-`HR/hr_webapp` (dead V2), `Desktop\AI\hr_webapp`, Claude-Projects on PythonAnywhere (quota). Never `git pull` the HR monorepo on PA.
+## Code
 
-## Deploy
-`HR/mizan` → `git push origin master` → PA Bash `cd ~/mizan-app && git pull origin master` → Web **Reload**. Do not upload laptop `mizan_dev.db` over live (wipes users). Excel full refresh: backup live db, then import script (it aborts if employees already exist).
+- Canonical: `engsadat/mizan-app` `master` @ `67504bf` (2026-08-25, finance report + Excel→DB load)
+- `STATUS.md` previously claimed live SHA `b02ef93` — **stale**. Live already has `/reports/finance`, so PA is at or after the finance commits. Confirm exact PA SHA on next PA session: `cd ~/mizan-app && git rev-parse --short HEAD`
+- Local laptop should be: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
-## Excel
-Day-to-day edits on the site. Master file: `HR/source/employees data source.xlsx`. Spec: `docs/superpowers/specs/2026-08-25-mizan-clean-rebuild-design.md`.
+## Product (this version)
+
+Three home cards: الموظفون، التقارير، الإعدادات.
+Settings = job codes + users. Roles: admin | editor | viewer.
+Reports: BI + filter + finance. No SCD, no V2, no second codebase.
+
+## One version — delete leftovers
+
+See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Projects Mizan PRs/branches. Close PR #2 without merging.
+
+## Next (one task)
+
+1. Reset live admin password on PythonAnywhere with `scripts/setup_admin.py`, Reload, confirm login.
+2. Then delete local old Mizan folders listed in `CLAUDE.md`.
+3. Then on PA: record `git rev-parse HEAD` here.
