@@ -85,12 +85,29 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - **Tests:** 35/35 passing
 - **Deployment:** Awaiting PythonAnywhere server deployment (Playwright install + web app reload required)
 
+## Known Limitations
+
+**HTML Design Gap:**
+- Current HTML generates data listings but lacks visual org chart structure
+- Reference PDFs (01_AS.pdf, etc.) show professional hierarchical layout with:
+  - KPI metric cards at top
+  - Grid-based RE cards with team details
+  - Color-coded role badges
+  - Multi-page detail hierarchies
+- Current output does NOT match reference design
+- Requires significant HTML/CSS redesign to match reference appearance
+
 ## Next (one task)
 
-**Org Chart Deployment to PythonAnywhere:**
+**Redesign HTML Org Chart Generation:**
+- Study reference PDF structure (01_AS.pdf - 5 pages, professional layout)
+- Rewrite gen_org_charts.py to generate proper visual hierarchy
+- Implement card-based layout with styling to match reference
+- Test PDF output quality vs reference
+
+**Or: Deploy Current Version to PythonAnywhere:**
 1. SSH to server (or PythonAnywhere bash console)
 2. `cd /home/southMizan/mizan-app && git pull origin master`
 3. `python -m playwright install chromium`
 4. Reload web app via PythonAnywhere dashboard
 5. Test: https://southmizan.pythonanywhere.com/reports/org-chart
-6. Verify PDF export works
