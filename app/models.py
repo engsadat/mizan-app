@@ -174,3 +174,70 @@ class FinancePO6Job(db.Model):
     variation_budget = db.Column(db.Float, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ── Projects ───────────────────────────────────────────────────────────────────
+
+class Project(db.Model):
+    """Project/Contract data from PMO source."""
+    __tablename__ = 'projects'
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Coordinates
+    x = db.Column(db.Float)
+    y = db.Column(db.Float)
+
+    # Network/Infrastructure
+    network_approved = db.Column(db.Float)  # أطوال الشبكات والخطوط (جدول كميات معتمد)
+    network_implemented = db.Column(db.Float)  # أطوال الشبكات والخطوط المنفذة (تراكمي)
+
+    # Contract/PO
+    operational_contract_no = db.Column(db.String(50), index=True)  # رقم العقد التشغيلي
+    project_number = db.Column(db.String(50), index=True)  # Project Number
+    po_no = db.Column(db.String(50), index=True)  # PO_No
+    included = db.Column(db.Boolean, default=True)  # Included flag
+
+    # Project Info
+    name = db.Column(db.String(500), nullable=False)  # إسم المشروع
+    value = db.Column(db.Float, default=0)  # القيمة
+    description = db.Column(db.Text)  # الوصف
+    funding_source = db.Column(db.String(200))  # مصدر التمويل
+
+    # Location
+    city = db.Column(db.String(200))  # المدينة / المحافظة
+    region = db.Column(db.String(100))  # المنطقة
+
+    # Contractor
+    contractor_name = db.Column(db.String(300))  # اسم المقاول
+    is_shared = db.Column(db.Boolean, default=False)  # مشترك
+    re_code = db.Column(db.String(50))  # م مقيم (RE code)
+
+    # Status
+    project_status = db.Column(db.String(100))  # وضع المشروع
+    project_state = db.Column(db.String(100))  # حالة المشروع
+    start_date = db.Column(db.Date)  # تاريخ البدء
+    end_date = db.Column(db.Date)  # تاريخ الانتهاء
+
+    # Contractor (English)
+    contractor = db.Column(db.String(300))  # Contractor
+
+    # Project Classification
+    classification = db.Column(db.String(200))  # تصنيف المشروع طبقاً للشركة
+
+    # RE by Region
+    re_asir = db.Column(db.String(200))  # اسم المقيم- عسير
+    re_jazan = db.Column(db.String(200))  # اسم المقيم- جازان
+    re_baha = db.Column(db.String(200))  # اسم المقيم-الباحة
+    re_najran = db.Column(db.String(200))  # اسم المقيم- نجران
+
+    # Progress
+    planned_completion = db.Column(db.Float, default=0)  # نسبة الإنجاز المخططة
+    actual_completion = db.Column(db.Float, default=0)  # نسبة الإنجاز الفعلية
+    variance = db.Column(db.Float, default=0)  # الفارق
+
+    # Facilities
+    treatment_stations = db.Column(db.Integer, default=0)  # عدد (محطة معالجة)
+    pumping_stations = db.Column(db.Integer, default=0)  # عدد (محطة رفع/ ضخ)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
