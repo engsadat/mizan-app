@@ -40,6 +40,14 @@ See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Proje
   - Print/PDF support
 - Tested locally and on PA — both working
 
+## Dashboard complete ✓
+
+Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-dashboard
+- KPI cards: total + 4 regions (تحت التنفيذ projects)
+- Pivot tables: count & values by status × region (all projects)
+- Charts: ongoing by region
+- Print/PDF support
+
 ## Next (one task)
 
-Dashboard complete. What's next? (add more reports, export features, or other data work?)
+Dashboard polished. What's next? (export Excel, project detail view, more data features?)
