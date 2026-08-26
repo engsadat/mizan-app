@@ -14,9 +14,9 @@ Do not save status to a Claude memo.
 
 ## Code
 
-- Canonical: `engsadat/mizan-app` `master` @ `e90d900` (2026-08-26, finance print fix + job codes script fix)
-- PythonAnywhere HEAD: `be4b590` (not yet pulled latest)
-- GitHub master: `e90d900` (finance report print layout + job code rates script fix)
+- Canonical: `engsadat/mizan-app` `master` @ `2a9f92e` (2026-08-26, org chart integration complete)
+- PythonAnywhere HEAD: `e90d900` (awaiting deployment of org chart feature)
+- GitHub master: `2a9f92e` (org chart merged: script, routes, templates, PDF export)
 - Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
 ## Product (this version)
@@ -48,31 +48,49 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Charts: ongoing by region
 - Print/PDF support
 
-## Latest work (2026-08-26, session 3)
+## Latest work (2026-08-26, session 3 — ORG CHART INTEGRATION COMPLETE)
 
-**Org Chart Integration** — Implemented Tasks 1-7 of org chart generation:
-- Created `scripts/gen_org_charts.py` script that:
-  - Loads Flask app context and Mizan database models
-  - Reads active employees (status = 'على قوة العمل') from database
-  - Reads ongoing projects (project_state = 'تحت التنفيذ') from database
-  - Loads optional supporting Excel files (emp_sort.xlsx, Office-RE.xlsx)
-  - Generates 4 region-specific HTML org chart files
-  - Writes to app/static/org_charts/ with filenames 09-12_OrgChart_*.html
+**Org Chart Integration** — Implemented & deployed (Tasks 1-14):
 
-HTML output features:
-- NWC + Al-Amro header with branding
-- KPI cards: employee count, project count per region
-- Employee cards: name, job title, RE code, direct manager, nationality
-- Project cards: name, contractor, RE code, dates, SAR value
-- RTL Arabic layout with Cairo font, responsive grid design
-- Print-friendly CSS media queries
+**Task Group A: Script Generation (Tasks 1-7)**
+- Created `scripts/gen_org_charts.py` with database integration
+  - Loads 444 active employees from Mizan database (status = 'على قوة العمل')
+  - Loads ongoing projects (project_state = 'تحت التنفيذ')
+  - Generates 4 region-specific HTML org charts
+  - Eager-loaded database queries (no N+1 issues)
+  - Real NWC/Al-Amro logos with base64 encoding
+  - Proper error handling for missing files
 
-Script tested end-to-end with sample data:
-- 4 sample employees across 3 regions
-- 3 sample projects across 3 regions
-- All 4 org chart HTML files generated successfully
+**Task Group B: Routes & Templates (Tasks 8-11)**
+- Added 3 Flask routes with comprehensive security:
+  - `/reports/org-chart` — Region selector (4 color-coded cards)
+  - `/reports/org-chart/<region>` — View org chart with toolbar (print, PDF, back)
+  - `/reports/org-chart/<region>/pdf` — Playwright-based PDF export (A3 landscape)
+- Created 2 templates with RTL Arabic support, Cairo font, responsive layout
+- Added org chart card to reports home page
+- Security measures: input validation, path traversal defense, XSS mitigation with comments
+- Error handling: proper HTTP status codes (404, 503, 500) with logging
+
+**Task Group C: Dependencies (Task 12)**
+- Added `playwright>=1.40.0` to requirements.txt
+
+**Task Group D: Testing & Deployment (Tasks 13-14)**
+- Local testing: 444 employees across 4 regions, all 4 HTML files generated
+- Tests passing: 35 passed (no regressions)
+- Code merged to master @ `2a9f92e`
+- Pushed to GitHub
+
+## Live Status (2026-08-26)
+- **Code:** Merged to master locally and GitHub
+- **Tests:** 35/35 passing
+- **Deployment:** Awaiting PythonAnywhere server deployment (Playwright install + web app reload required)
 
 ## Next (one task)
 
-**Org Chart Integration Routes** — Build routes to serve org chart files via web interface and add to navigation.
-Or: **Database Population** — Import actual employee and project data, then run org chart script.
+**Org Chart Deployment to PythonAnywhere:**
+1. SSH to server (or PythonAnywhere bash console)
+2. `cd /home/southMizan/mizan-app && git pull origin master`
+3. `python -m playwright install chromium`
+4. Reload web app via PythonAnywhere dashboard
+5. Test: https://southmizan.pythonanywhere.com/reports/org-chart
+6. Verify PDF export works
