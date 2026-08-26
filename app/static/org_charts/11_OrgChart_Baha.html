@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الهيكل التنظيمي - الباحة</title>
+  <style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Cairo", Arial, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+        direction: rtl;
+    }
+
+    .header {
+        background: linear-gradient(to bottom, #0a1f3d, #0071b9);
+        color: white;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        direction: ltr;
+    }
+
+    .header img {
+        height: 60px;
+    }
+
+    .header-title {
+        flex-grow: 1;
+        text-align: center;
+        direction: rtl;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .kpi {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-right: 4px solid #0071b9;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .kpi-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .kpi-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0a1f3d;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #0a1f3d;
+        border-bottom: 2px solid #0071b9;
+        padding-bottom: 10px;
+        margin: 30px 0 20px 0;
+    }
+
+    .emp-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .emp-card {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+    }
+
+    .emp-name {
+        font-weight: bold;
+        color: #0a1f3d;
+        margin-bottom: 5px;
+    }
+
+    .emp-detail {
+        font-size: 12px;
+        color: #666;
+        margin: 3px 0;
+    }
+
+    .pro-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 15px;
+    }
+
+    .pro-card {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-left: 4px solid #059669;
+        border-radius: 4px;
+        padding: 15px;
+    }
+
+    .pro-name {
+        font-weight: bold;
+        color: #0a1f3d;
+        margin-bottom: 5px;
+    }
+
+    .pro-detail {
+        font-size: 12px;
+        color: #666;
+        margin: 3px 0;
+    }
+
+    .pro-value {
+        font-weight: bold;
+        color: #059669;
+        margin-top: 10px;
+    }
+
+    @media print {
+        body {
+            background: white;
+        }
+        .container {
+            box-shadow: none;
+            max-width: 100%;
+        }
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="data:image/svg+xml,%3Csvg%3E%3C/svg%3E" alt="NWC">
+    <div class="header-title">الهيكل التنظيمي - الباحة</div>
+    <img src="data:image/svg+xml,%3Csvg%3E%3C/svg%3E" alt="Al-Amro">
+  </div>
+  <div class="container">
+    <div class="summary">
+      <div class="kpi">
+        <div class="kpi-label">إجمالي الموظفين</div>
+        <div class="kpi-value">58</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">المشاريع النشطة</div>
+        <div class="kpi-value">0</div>
+      </div>
+    </div>
+    <div class="section-title">الموظفون</div>
+    <div class="emp-list">
+      <div class="emp-card">
+        <div class="emp-name">أبراهيم محمد بليغ البحيري</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أحمد الحسين عبد الفتاح فريد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> حاسب كميات</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> دعم فني- الباحة</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أحمد جمال مسعد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أحمد جمعة مصطفى</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أحمد محمد الشبراوي محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> حاسب كميات</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أحمد محمد موسى البارقي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أشرف محمد الجاك</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> أخصائي وثائق</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أمين بسيوني أحمد الجندي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">أيمن سيد عبد الحميد أحمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس مقيم</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس مقيم</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">الحسين عبد الفتاح فريد مرسى</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس كهرباء</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">باهر جمال عبد الرازق</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس ميكانيكا</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">جول ناس خان اكرام</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> باكستاني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">حسب الرسول علي احمد علي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">حمادة فتح الرحمن السبكي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">سامح سليم محمد سليم</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">سراقه بانقا الطيب مصطفي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">سفيان سردار سردار احمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> باكستاني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">سيد عبد الحميد أحمد حسن</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">صالح عبد المقصود محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> دعم فني- الباحة</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">صهيب الفاضل عبدالخالق</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">طارق حمدان مقدم التوم</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس ميكانيكا</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عباس مصطفي فضل المولي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عبد الله عاصف خلف الله</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عبد الله محمد عبد الوهاب محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عبدالاله عبدالله الزهراني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عبدالعزيز سعيد صالح الزهراني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عبدالله عائش الغامدي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> حاسب كميات</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عثمان عبد المنعم عثمان حامد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عسران محمد عبد اللطيف صالح</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عمار البشير محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">عمر حامد خليل الزعفراني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">فارس محمد احمد الزهراني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">فرغلي عبدالعظيم فرغلي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">ليلى عبد ربه صالح الزهراني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> أخصائي وثائق</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> دعم فني- الباحة</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سعودي</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس مقيم</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محجوب محمد محجوب</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد إدفاوي محمود علي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد احمد عبدالقادر هجو</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد احمد محمد إبراهيم العتر</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس كهرباء</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد الحنفي محمد الفاتح</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> أخصائي وثائق</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد حامد عبد الله محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب أمن وسلامة</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد حسن عبدالله على</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد سعيد محمود جاد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد شرف الدين التيجاني</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس تخطيط</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد عبد الغني محمود السيد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد عبدالعزيز بابكر</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد فوزي أحمد علي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمد يحي عبد الرحمن</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مساح</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> مؤمن عادل السيد علام</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمود محمد المكبر</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> حاسب كميات</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">محمود محمد يوسف عثمان</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">نصر دقدوق محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس مقيم</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> هشام عبد العظيم محمد صالح</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">هشام محمد أحمد فضيل</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مراقب موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">هيثم هشام حسن محمد</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس كهرباء</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد محمد عبدالماجد احمد</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">وليد حسن عثمان</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> مهندس موقع</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> 0</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> مصري</div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-name">ياسر محمد أحمد كمبلاوي</div>
+        <div class="emp-detail"><strong>الوظيفة:</strong> أخصائي وثائق</div>
+        <div class="emp-detail"><strong>كود المقيم:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>المدير المباشر:</strong> احمد صالح عبده</div>
+        <div class="emp-detail"><strong>الجنسية:</strong> سوداني</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
