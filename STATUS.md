@@ -9,8 +9,8 @@ Do not save status to a Claude memo.
 - URL: https://southmizan.pythonanywhere.com — **up**
 - Login page: Arabic ميزان / المنطقة الجنوبية, CSRF on, session cookie Secure + HttpOnly + SameSite=Lax
 - `/` `/employees/` `/reports/` `/settings/` `/reports/finance` → redirect to `/auth/login` (routes exist)
-- Login with the old memo password (`admin` / value from Claude memo): **failed** (`بيانات خاطئة`)
-- Inside app (home cards, 575 employees, finance numbers): **not checked** (no working login from this session)
+- Login (admin user, password reset on PA): **succeeded** (2026-08-26)
+- Inside app (home cards, 575 employees, finance numbers): **not checked** (login works, content not verified)
 
 ## Code
 
