@@ -1,4 +1,5 @@
 import json, base64, re
+from datetime import date
 from collections import Counter
 from pathlib import Path
 from flask import render_template, request
@@ -257,43 +258,83 @@ def emp_dashboard():
         logo_nwc=logo_nwc,
     )
 
+def _msar(v):
+    return round((v or 0) / 1e6, 1)
+
 
 def _project_pivot_data():
-    """Get project data as pivot table: regions as columns, status as rows."""
+    """Included=Yes. KPIs + charts = تحت التنفيذ by region. Tables = all statuses."""
     projects = Project.query.filter_by(included=True).all()
 
-    # Collect all regions and statuses
-    regions = sorted(set(p.region for p in projects if p.region))
-    statuses = sorted(set(p.project_state for p in projects if p.project_state))
+    def region_of(p):
+        return (p.region or '').strip() or 'غير محدد'
 
-    if not regions:
-        regions = ['غير محدد']
-    if not statuses:
-        statuses = ['غير محدد']
+    def state_of(p):
+        return (p.project_state or '').strip() or 'غير محدد'
 
-    # Build pivot table: status -> region -> count, value
+    extra = []
+    for p in projects:
+        r = region_of(p)
+        if r not in REGIONS and r not in extra:
+            extra.append(r)
+    regions = list(REGIONS) + extra
+
+    status_value = {}
     pivot = {}
-    for status in statuses:
-        pivot[status] = {}
-        for region in regions:
-            count = len([p for p in projects if (p.project_state or 'غير محدد') == status and (p.region or 'غير محدد') == region])
-            value = sum(p.value or 0 for p in projects if (p.project_state or 'غير محدد') == status and (p.region or 'غير محدد') == region)
-            pivot[status][region] = {'count': count, 'value': value}
+    for p in projects:
+        st, rg = state_of(p), region_of(p)
+        status_value[st] = status_value.get(st, 0) + (p.value or 0)
+        pivot.setdefault(st, {})
+        cell = pivot[st].setdefault(rg, {'count': 0, 'value': 0.0})
+        cell['count'] += 1
+        cell['value'] += p.value or 0
 
-    # Calculate totals by region
-    region_totals = {}
-    for region in regions:
-        region_totals[region] = sum(p.value or 0 for p in projects if (p.region or 'غير محدد') == region)
+    statuses = sorted(status_value, key=lambda s: -status_value[s])
+    for st in statuses:
+        for rg in regions:
+            cell = pivot[st].setdefault(rg, {'count': 0, 'value': 0.0})
+            cell['msar'] = _msar(cell['value'])
 
-    total_value = sum(p.value or 0 for p in projects)
+    region_counts = {}
+    region_msar = {}
+    for rg in regions:
+        tot = sum(pivot[st][rg]['count'] for st in statuses) if statuses else 0
+        val = sum(pivot[st][rg]['value'] for st in statuses) if statuses else 0
+        region_counts[rg] = tot
+        region_msar[rg] = _msar(val)
+
+    count_row_totals = {
+        st: sum(pivot[st][rg]['count'] for rg in regions) for st in statuses
+    }
+    msar_row_totals = {
+        st: _msar(sum(pivot[st][rg]['value'] for rg in regions)) for st in statuses
+    }
+
+    ongoing = [p for p in projects if state_of(p) == ONGOING_STATE]
+    ongoing_kpis = []
+    for rg in regions:
+        rows = [p for p in ongoing if region_of(p) == rg]
+        ongoing_kpis.append({
+            'region': rg,
+            'count': len(rows),
+            'msar': _msar(sum(p.value or 0 for p in rows)),
+        })
 
     return {
         'regions': regions,
         'statuses': statuses,
         'pivot': pivot,
-        'region_totals': region_totals,
-        'total_value': total_value,
+        'region_counts': region_counts,
+        'region_msar': region_msar,
+        'count_row_totals': count_row_totals,
+        'msar_row_totals': msar_row_totals,
         'total_projects': len(projects),
+        'total_msar': _msar(sum(p.value or 0 for p in projects)),
+        'ongoing_kpis': ongoing_kpis,
+        'ongoing_count': len(ongoing),
+        'ongoing_msar': _msar(sum(p.value or 0 for p in ongoing)),
+        'value_chart': [{'name': k['region'], 'value': k['msar']} for k in ongoing_kpis],
+        'count_chart': [{'name': k['region'], 'count': k['count']} for k in ongoing_kpis],
     }
 
 
@@ -301,29 +342,26 @@ def _project_pivot_data():
 @login_required
 def projects_dashboard():
     data = _project_pivot_data()
-
-    # Prepare chart data (values by region)
-    region_labels = data['regions']
-    region_values = [data['region_totals'].get(r, 0) for r in region_labels]
-
-    logo_alamro = _b64_logo('Alamro_Logo.png')
-    logo_nwc    = _b64_logo('NWC_Logo.png')
-
     return render_template(
         'reports/projects_dashboard.html',
+        now=date.today().strftime('%Y-%m-%d'),
         regions=data['regions'],
         statuses=data['statuses'],
         pivot=data['pivot'],
-        region_totals=data['region_totals'],
-        region_labels=json.dumps(region_labels, ensure_ascii=False),
-        region_values=json.dumps(region_values),
-        total_value=data['total_value'],
+        region_counts=data['region_counts'],
+        region_msar=data['region_msar'],
+        count_row_totals=data['count_row_totals'],
+        msar_row_totals=data['msar_row_totals'],
         total_projects=data['total_projects'],
-        logo_alamro=logo_alamro,
-        logo_nwc=logo_nwc,
+        total_msar=data['total_msar'],
+        ongoing_kpis=data['ongoing_kpis'],
+        ongoing_count=data['ongoing_count'],
+        ongoing_msar=data['ongoing_msar'],
+        value_chart=json.dumps(data['value_chart'], ensure_ascii=False),
+        count_chart=json.dumps(data['count_chart'], ensure_ascii=False),
+        logo_alamro=_b64_logo('Alamro_Logo.png'),
+        logo_nwc=_b64_logo('NWC_Logo.png'),
     )
-
-
 @reports_bp.route('/finance')
 @login_required
 def finance():

@@ -80,7 +80,7 @@ updated, not_found = 0, []
 for title, rate in RATES.items():
     n = cur.execute(
         'UPDATE job_codes SET standard_rate=?, code=? WHERE title=?',
-        (rate, title, title)
+        (rate, CODES[title], title)
     ).rowcount
     if n:
         updated += 1

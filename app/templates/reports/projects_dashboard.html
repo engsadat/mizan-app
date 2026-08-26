@@ -3,134 +3,243 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة مشاريع — ميزان</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <title>لوحة المشاريع — ميزان</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
-    body { font-family: 'Cairo', sans-serif; background: #f0f4f8; }
-    .navbar { background: #0a1f3d !important; }
-    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; }
-    .kpi { background: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
-    .kpi-label { font-size: 0.9rem; color: #666; margin-bottom: 8px; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: #0a1f3d; }
-    .kpi-sub { font-size: 0.8rem; color: #999; margin-top: 4px; }
-    table { font-size: 0.9rem; }
-    thead { background: #0a1f3d; color: white; }
-    tbody td { border-bottom: 1px solid #e5e7eb; }
-    .num { text-align: center; font-weight: 600; }
-    .chart-container { position: relative; height: 300px; margin: 20px 0; }
-    .filter-badge { display: inline-block; background: #0a1f3d; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 15px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Cairo, sans-serif;
+      background: #f0f4f8;
+      color: #0a1f3d;
+      direction: rtl;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .toolbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: #0a1f3d; display: flex; align-items: center;
+      padding: 8px 16px; gap: 12px; direction: ltr;
+    }
+    .toolbar a, .toolbar button {
+      font-family: Cairo, sans-serif; font-size: 13px;
+      color: white; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+      border-radius: 6px; padding: 5px 14px; text-decoration: none; cursor: pointer;
+    }
+    .toolbar .spacer { flex: 1; }
+    .toolbar .label { color: rgba(255,255,255,.6); font-size: 12px; }
+    .page-wrap { padding-top: 48px; }
+    .page {
+      width: 297mm; margin: 6mm auto; padding: 6mm;
+      background: #fff; box-shadow: 0 6px 40px rgba(0,46,91,.22);
+    }
+    .hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #0a1f3d; color: #fff; padding: 8px 12px; border-radius: 6px;
+      margin-bottom: 10px; min-height: 50px;
+    }
+    .hdr img { height: 36px; background: #fff; border-radius: 4px; padding: 2px 6px; }
+    .hdr h1 { font-size: 0.9rem; font-weight: 700; flex: 1; text-align: center; line-height: 1.35; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+    .kpi { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .kpi-h { background: #003462; color: #fff; text-align: center; font-size: 0.78rem; font-weight: 700; padding: 6px; }
+    .kpi-b { padding: 8px; text-align: center; }
+    .kpi-v { font-size: 1.35rem; font-weight: 800; line-height: 1.1; font-family: Arial, sans-serif; }
+    .kpi-s { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+    .note { font-size: 0.75rem; color: #64748b; margin: 0 0 8px; }
+    .section { border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+    .section-title {
+      background: #003462; color: #fff; padding: 7px 12px; font-size: 0.82rem; font-weight: 700;
+      border-right: 4px solid #0071b9;
+    }
+    .section-body { padding: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    thead th { background: #0a1f3d; color: #fff; padding: 6px 4px; text-align: center; }
+    td { border-bottom: 1px solid #e5e7eb; padding: 5px 4px; }
+    td:first-child { text-align: right; }
+    .num { text-align: center; font-family: Arial, sans-serif; }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .chart-box { position: relative; height: 220px; }
+    @page { size: A4 landscape; margin: 8mm; }
+    @media print {
+      .toolbar { display: none; }
+      .page-wrap { padding-top: 0; }
+      body { background: #fff; }
+      .page { margin: 0; box-shadow: none; width: auto; }
+      .chart-box { height: 200px; }
+    }
   </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/reports">← التقارير</a>
-    <span class="navbar-text text-white">لوحة مشاريع القطاع الجنوبي</span>
-  </div>
-</nav>
+<div class="toolbar">
+  <a href="/reports/">← التقارير</a>
+  <span class="label">لوحة المشاريع</span>
+  <span class="spacer"></span>
+  <button type="button" onclick="setTimeout(()=>window.print(),200)">طباعة / PDF</button>
+</div>
 
-<div class="container-fluid px-4">
-  <!-- Filter & KPIs -->
-  <div class="mb-3">
-    <span class="filter-badge">✓ المشاريع المدرجة فقط (Included = Yes)</span>
+<div class="page-wrap">
+<div class="page">
+
+  <div class="hdr">
+    {% if logo_alamro %}<img src="{{ logo_alamro }}" alt="Al-Amro">{% endif %}
+    <h1>لوحة المشاريع — المشاريع المدرجة<br>
+      <span style="font-size:0.7rem;opacity:.85">تحت التنفيذ حسب المنطقة · {{ now }}</span></h1>
+    {% if logo_nwc %}<img src="{{ logo_nwc }}" alt="NWC">{% endif %}
   </div>
 
-  <div class="row mb-4">
-    <div class="col-md-6">
-      <div class="kpi">
-        <div class="kpi-label">إجمالي المشاريع</div>
-        <div class="kpi-value">{{ total_projects }}</div>
+  <p class="note">مؤشرات الصف الأول: حالة <b>تحت التنفيذ</b> فقط · الجداول تشمل كل الحالات (Included = Yes) · القيمة بمليون ريال (MSAR)</p>
+
+  <div class="kpi-grid">
+    {% for k in ongoing_kpis %}
+    <div class="kpi">
+      <div class="kpi-h">{{ k.region }} — تحت التنفيذ</div>
+      <div class="kpi-b">
+        <div class="kpi-v" style="color:#0071b9">{{ k.count }}</div>
+        <div class="kpi-s">مشروع</div>
+        <div class="kpi-v" style="font-size:1.05rem;margin-top:6px">{{ "%.1f"|format(k.msar) }}</div>
+        <div class="kpi-s">مليون ر.س</div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="kpi">
-        <div class="kpi-label">إجمالي القيمة (ريال سعودي)</div>
-        <div class="kpi-value">{{ "{:,.0f}".format(total_value) }}</div>
-      </div>
-    </div>
+    {% endfor %}
   </div>
+  <p class="note">إجمالي تحت التنفيذ: {{ ongoing_count }} مشروع · {{ "%.1f"|format(ongoing_msar) }} مليون ر.س · كل المدرجة: {{ total_projects }} مشروع · {{ "%.1f"|format(total_msar) }} MSAR</p>
 
-  <!-- Pivot Table -->
-  <div class="card p-4 mb-4">
-    <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">المشاريع حسب الحالة والمنطقة (القيمة بالريال)</h6>
-    <div class="table-responsive">
-      <table class="table table-bordered">
+  <div class="section">
+    <div class="section-title">العدد حسب الحالة والمنطقة</div>
+    <div class="section-body">
+      <table>
         <thead>
           <tr>
             <th style="text-align:right">حالة المشروع</th>
-            {% for region in regions %}
-            <th class="num">{{ region }}</th>
-            {% endfor %}
-            <th class="num" style="background:#003462">الإجمالي</th>
+            {% for region in regions %}<th>{{ region }}</th>{% endfor %}
+            <th>الإجمالي</th>
           </tr>
         </thead>
         <tbody>
           {% for status in statuses %}
           <tr>
-            <td style="text-align:right">{{ status }}</td>
+            <td>{{ status }}</td>
             {% for region in regions %}
-            <td class="num">{{ "{:,.0f}".format(pivot[status][region]['value']) }}</td>
+            <td class="num">{{ pivot[status][region]['count'] }}</td>
             {% endfor %}
-            <td class="num" style="background:#f3f4f6;font-weight:700">
-              {{ "{:,.0f}".format(pivot[status].values() | map(attribute='value') | sum) }}
-            </td>
+            <td class="num" style="font-weight:700">{{ count_row_totals[status] }}</td>
           </tr>
           {% endfor %}
-          <tr style="background:#f8fafc;font-weight:700">
-            <td style="text-align:right">الإجمالي</td>
+          <tr style="background:#f1f5f9;font-weight:700">
+            <td>الإجمالي</td>
             {% for region in regions %}
-            <td class="num">{{ "{:,.0f}".format(region_totals[region]) }}</td>
+            <td class="num">{{ region_counts[region] }}</td>
             {% endfor %}
-            <td class="num" style="background:#0a1f3d;color:white">{{ "{:,.0f}".format(total_value) }}</td>
+            <td class="num">{{ total_projects }}</td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Chart: Values by Region -->
-  <div class="card p-4">
-    <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">القيمة حسب المنطقة</h6>
-    <div class="chart-container">
-      <canvas id="regionChart"></canvas>
+  <div class="section">
+    <div class="section-title">القيمة حسب الحالة والمنطقة (مليون ر.س)</div>
+    <div class="section-body">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:right">حالة المشروع</th>
+            {% for region in regions %}<th>{{ region }}</th>{% endfor %}
+            <th>الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for status in statuses %}
+          <tr>
+            <td>{{ status }}</td>
+            {% for region in regions %}
+            <td class="num">{{ "%.1f"|format(pivot[status][region]['msar']) }}</td>
+            {% endfor %}
+            <td class="num" style="font-weight:700">{{ "%.1f"|format(msar_row_totals[status]) }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="background:#f1f5f9;font-weight:700">
+            <td>الإجمالي</td>
+            {% for region in regions %}
+            <td class="num">{{ "%.1f"|format(region_msar[region]) }}</td>
+            {% endfor %}
+            <td class="num">{{ "%.1f"|format(total_msar) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div class="mb-5"></div>
+  <div class="charts">
+    <div class="section">
+      <div class="section-title">قيمة تحت التنفيذ حسب المنطقة (مليون ر.س)</div>
+      <div class="section-body"><div class="chart-box"><canvas id="valueChart"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">عدد تحت التنفيذ حسب المنطقة</div>
+      <div class="section-body"><div class="chart-box"><canvas id="countChart"></canvas></div></div>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
-const regionLabels = {{ region_labels | safe }};
-const regionValues = {{ region_values | safe }};
+Chart.register(ChartDataLabels);
+const NAVY = '#0a1f3d', TEAL = '#0071b9';
+const valueRaw = {{ value_chart | safe }};
+const countRaw = {{ count_chart | safe }};
 
-new Chart(document.getElementById('regionChart'), {
+new Chart(document.getElementById('valueChart'), {
   type: 'bar',
   data: {
-    labels: regionLabels,
-    datasets: [{
-      label: 'القيمة (ريال)',
-      data: regionValues,
-      backgroundColor: '#0a1f3d',
-      borderRadius: 6,
-    }]
+    labels: valueRaw.map(d => d.name),
+    datasets: [{ data: valueRaw.map(d => d.value), backgroundColor: NAVY, borderRadius: 5 }]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { callback: v => (v/1000000).toFixed(0) + 'م' },
-        grid: { drawBorder: false }
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        anchor: 'end', align: 'end', color: NAVY,
+        font: { family: 'Cairo', weight: 'bold', size: 11 },
+        formatter: v => v ? v.toFixed(0) : ''
       }
-    }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 11 } } },
+      y: { beginAtZero: true, ticks: { callback: v => v + 'م' }, grid: { color: '#f1f5f9' } }
+    },
+    layout: { padding: { top: 18 } }
+  }
+});
+
+new Chart(document.getElementById('countChart'), {
+  type: 'bar',
+  data: {
+    labels: countRaw.map(d => d.name),
+    datasets: [{ data: countRaw.map(d => d.count), backgroundColor: TEAL, borderRadius: 5 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        anchor: 'end', align: 'end', color: NAVY,
+        font: { family: 'Cairo', weight: 'bold', size: 12 },
+        formatter: v => v || ''
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 11 } } },
+      y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } }
+    },
+    layout: { padding: { top: 18 } }
   }
 });
 </script>
-
 </body>
 </html>
