@@ -48,6 +48,31 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Charts: ongoing by region
 - Print/PDF support
 
-## Next (one task) — BIG TASK, START NEW SESSION
+## Latest work (2026-08-26, session 3)
 
-**Organizational Chart Report** — Build report showing project structure, management chain, roles, reporting relationships. Prefer fresh session with dedicated focus.
+**Org Chart Integration** — Implemented Tasks 1-7 of org chart generation:
+- Created `scripts/gen_org_charts.py` script that:
+  - Loads Flask app context and Mizan database models
+  - Reads active employees (status = 'على قوة العمل') from database
+  - Reads ongoing projects (project_state = 'تحت التنفيذ') from database
+  - Loads optional supporting Excel files (emp_sort.xlsx, Office-RE.xlsx)
+  - Generates 4 region-specific HTML org chart files
+  - Writes to app/static/org_charts/ with filenames 09-12_OrgChart_*.html
+
+HTML output features:
+- NWC + Al-Amro header with branding
+- KPI cards: employee count, project count per region
+- Employee cards: name, job title, RE code, direct manager, nationality
+- Project cards: name, contractor, RE code, dates, SAR value
+- RTL Arabic layout with Cairo font, responsive grid design
+- Print-friendly CSS media queries
+
+Script tested end-to-end with sample data:
+- 4 sample employees across 3 regions
+- 3 sample projects across 3 regions
+- All 4 org chart HTML files generated successfully
+
+## Next (one task)
+
+**Org Chart Integration Routes** — Build routes to serve org chart files via web interface and add to navigation.
+Or: **Database Population** — Import actual employee and project data, then run org chart script.
