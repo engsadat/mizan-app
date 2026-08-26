@@ -185,7 +185,7 @@
       .page-wrap { padding-top: 0; }
       body { background: white; }
       .page { margin: 0; box-shadow: none; }
-      .jobs-block { page-break-before: always; page-break-inside: avoid; }
+      .jobs-block { page-break-before: always; page-break-after: always; page-break-inside: avoid; }
       .jobs-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
       .job-row { padding: 4px; font-size: 0.65rem; }
       .progress-bar { height: 14px; }
@@ -276,34 +276,35 @@
       </table>
       {% endif %}
 
-      <!-- PO 6 Jobs Breakdown -->
-      {% if po6_jobs %}
-      <div class="jobs-block">
-        <strong style="font-size:0.8rem;margin-top:8px;display:block">تفاصيل العناصر والوظائف:</strong>
-        <div class="jobs-list" style="margin-top:6px">
-          {% for job in po6_jobs %}
-            {% if job.var_budget > 0 or job.cum_total > 0 %}
-            <div class="job-row">
-              <div style="text-align:center;font-weight:700">{{ job.no }}</div>
-              <div style="text-align:right">{{ job.desc }}</div>
-              <div class="num">{{ "{:,.0f}".format(job.var_budget) }}</div>
-              <div class="num">{{ "{:,.0f}".format(job.cum_total) }}</div>
-              <div>
-                <div class="progress-bar">
-                  <div class="progress-fill {% if job.pct_complete >= 85 %}red{% elif job.pct_complete >= 60 %}amber{% endif %}"
-                       style="width:{{ [job.pct_complete, 100] | min }}%">
-                    {{ "%.0f%%"|format(job.pct_complete) }}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
     </div>
   </div>
+
+  <!-- PO 6 Jobs Breakdown (own page in print) -->
+  {% if po6_jobs %}
+  <div class="jobs-block">
+    <strong style="font-size:0.8rem;margin-top:8px;display:block">تفاصيل العناصر والوظائف:</strong>
+    <div class="jobs-list" style="margin-top:6px">
+      {% for job in po6_jobs %}
+        {% if job.var_budget > 0 or job.cum_total > 0 %}
+        <div class="job-row">
+          <div style="text-align:center;font-weight:700">{{ job.no }}</div>
+          <div style="text-align:right">{{ job.desc }}</div>
+          <div class="num">{{ "{:,.0f}".format(job.var_budget) }}</div>
+          <div class="num">{{ "{:,.0f}".format(job.cum_total) }}</div>
+          <div>
+            <div class="progress-bar">
+              <div class="progress-fill {% if job.pct_complete >= 85 %}red{% elif job.pct_complete >= 60 %}amber{% endif %}"
+                   style="width:{{ [job.pct_complete, 100] | min }}%">
+                {{ "%.0f%%"|format(job.pct_complete) }}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   <!-- SECTION 2: ORIGINAL CONTRACT (PO 1-5) — SECOND -->
