@@ -10,13 +10,13 @@ Do not save status to a Claude memo.
 - Login page: Arabic ميزان / المنطقة الجنوبية, CSRF on, session cookie Secure + HttpOnly + SameSite=Lax
 - `/` `/employees/` `/reports/` `/settings/` `/reports/finance` → redirect to `/auth/login` (routes exist)
 - Login (admin user, password reset on PA): **succeeded** (2026-08-26)
-- Inside app (home cards, 575 employees, finance numbers): **not checked** (login works, content not verified)
+- Job codes page: Populated with codes and salaries via script (2026-08-26)
 
 ## Code
 
-- Canonical: `engsadat/mizan-app` `master` @ `67504bf` (2026-08-25, finance report + Excel→DB load)
-- PythonAnywhere HEAD: `be4b590` (checked 2026-08-26, in sync with GitHub, login + all routes working)
-- GitHub master: `be4b590` (PA synchronized)
+- Canonical: `engsadat/mizan-app` `master` @ `e90d900` (2026-08-26, finance print fix + job codes script fix)
+- PythonAnywhere HEAD: `be4b590` (not yet pulled latest)
+- GitHub master: `e90d900` (finance report print layout + job code rates script fix)
 - Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
 ## Product (this version)
@@ -31,4 +31,4 @@ See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Proje
 
 ## Next (one task)
 
-All systems nominal: PA and GitHub in sync at `be4b590`, login working, all routes responding. Ready for feature work or bug reports.
+Begin project data work. What's the first step? (data source import, schema design, UI, reporting?).
