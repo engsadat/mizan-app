@@ -15,8 +15,9 @@ Do not save status to a Claude memo.
 ## Code
 
 - Canonical: `engsadat/mizan-app` `master` @ `67504bf` (2026-08-25, finance report + Excel→DB load)
-- `STATUS.md` previously claimed live SHA `b02ef93` — **stale**. Live already has `/reports/finance`, so PA is at or after the finance commits. Confirm exact PA SHA on next PA session: `cd ~/mizan-app && git rev-parse --short HEAD`
-- Local laptop should be: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
+- PythonAnywhere HEAD: `a7b43c8` (checked 2026-08-26)
+- GitHub master: `fa6c017` (login status update, not yet pulled on PA)
+- Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
 
 ## Product (this version)
 
@@ -30,6 +31,4 @@ See `CLAUDE.md` §1. Dead: `hr_webapp` folders, `nwc-mizan-webapp`, Claude-Proje
 
 ## Next (one task)
 
-1. Reset live admin password on PythonAnywhere with `scripts/setup_admin.py`, Reload, confirm login.
-2. Then delete local old Mizan folders listed in `CLAUDE.md`.
-3. Then on PA: record `git rev-parse HEAD` here.
+1. Close PR #2 (SCD Type 2 / V2 models) on GitHub without merging — then delete branch `feature/mizan-v2-task2-sqlalchemy-models`.
