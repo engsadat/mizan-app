@@ -4,7 +4,7 @@ from pathlib import Path
 from flask import render_template, request
 from flask_login import login_required
 from app.blueprints.reports import reports_bp
-from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office
+from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office, Project
 from app import db
 
 REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
@@ -253,6 +253,77 @@ def emp_dashboard():
         charts_json=charts_json,
         region_bar=region_bar,
         total=total,
+        logo_alamro=logo_alamro,
+        logo_nwc=logo_nwc,
+    )
+
+
+def _project_chart_data():
+    """Get project dashboard data filtered by included=True."""
+    projects = Project.query.filter_by(included=True).all()
+
+    # Group by region and status
+    by_region = {}
+    by_status = {}
+    value_by_region = {}
+    value_by_status = {}
+
+    for proj in projects:
+        reg = proj.region or 'غير محدد'
+        sta = proj.project_state or 'غير محدد'
+        val = proj.value or 0
+
+        by_region[reg] = by_region.get(reg, 0) + 1
+        by_status[sta] = by_status.get(sta, 0) + 1
+        value_by_region[reg] = value_by_region.get(reg, 0) + val
+        value_by_status[sta] = value_by_status.get(sta, 0) + val
+
+    # Prepare chart data
+    regions = sorted(by_region.keys())
+    statuses = sorted(by_status.keys())
+
+    total_projects = len(projects)
+    total_value = sum(p.value or 0 for p in projects)
+
+    return {
+        'by_region': by_region,
+        'by_status': by_status,
+        'value_by_region': value_by_region,
+        'value_by_status': value_by_status,
+        'regions': regions,
+        'statuses': statuses,
+        'total_projects': total_projects,
+        'total_value': total_value,
+    }
+
+
+@reports_bp.route('/projects-dashboard')
+@login_required
+def projects_dashboard():
+    data = _project_chart_data()
+
+    # Format for Chart.js
+    region_labels = data['regions']
+    region_counts = [data['by_region'].get(r, 0) for r in region_labels]
+    region_values = [data['value_by_region'].get(r, 0) for r in region_labels]
+
+    status_labels = data['statuses']
+    status_counts = [data['by_status'].get(s, 0) for s in status_labels]
+    status_values = [data['value_by_status'].get(s, 0) for s in status_labels]
+
+    logo_alamro = _b64_logo('Alamro_Logo.png')
+    logo_nwc    = _b64_logo('NWC_Logo.png')
+
+    return render_template(
+        'reports/projects_dashboard.html',
+        region_labels=json.dumps(region_labels, ensure_ascii=False),
+        region_counts=json.dumps(region_counts),
+        region_values=json.dumps(region_values),
+        status_labels=json.dumps(status_labels, ensure_ascii=False),
+        status_counts=json.dumps(status_counts),
+        status_values=json.dumps(status_values),
+        total_projects=data['total_projects'],
+        total_value=data['total_value'],
         logo_alamro=logo_alamro,
         logo_nwc=logo_nwc,
     )

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة مشاريع — ميزان</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: 'Cairo', sans-serif; background: #f0f4f8; }
+    .navbar { background: #0a1f3d !important; }
+    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; }
+    .kpi { background: white; padding: 20px; border-radius: 8px; text-align: center; }
+    .kpi-label { font-size: 0.9rem; color: #666; margin-bottom: 8px; }
+    .kpi-value { font-size: 2rem; font-weight: 700; color: #0a1f3d; }
+    .kpi-sub { font-size: 0.8rem; color: #999; margin-top: 4px; }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
+    .filter-badge { display: inline-block; background: #0a1f3d; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/reports">← التقارير</a>
+    <span class="navbar-text text-white">لوحة مشاريع القطاع الجنوبي</span>
+  </div>
+</nav>
+
+<div class="container-fluid px-4">
+  <!-- Filter indicator -->
+  <div class="mb-3">
+    <span class="filter-badge">✓ المشاريع المدرجة فقط (Included = Yes)</span>
+  </div>
+
+  <!-- KPIs Row -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="kpi">
+        <div class="kpi-label">إجمالي المشاريع</div>
+        <div class="kpi-value">{{ total_projects }}</div>
+        <div class="kpi-sub">مشروع نشط</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="kpi">
+        <div class="kpi-label">إجمالي القيمة</div>
+        <div class="kpi-value">{{ "{:,.0f}".format(total_value) }}</div>
+        <div class="kpi-sub">ريال سعودي</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row">
+    <!-- By Region -->
+    <div class="col-lg-6">
+      <div class="card p-4">
+        <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">المشاريع حسب المنطقة</h6>
+        <div class="chart-container">
+          <canvas id="regionChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- By Status -->
+    <div class="col-lg-6">
+      <div class="card p-4">
+        <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">المشاريع حسب الحالة</h6>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Value Charts -->
+  <div class="row mt-4">
+    <div class="col-lg-6">
+      <div class="card p-4">
+        <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">القيمة حسب المنطقة</h6>
+        <div class="chart-container">
+          <canvas id="valueRegionChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card p-4">
+        <h6 class="mb-3" style="color:#0a1f3d;font-weight:700">القيمة حسب الحالة</h6>
+        <div class="chart-container">
+          <canvas id="valueStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-5"></div>
+</div>
+
+<script>
+const regionLabels = {{ region_labels | safe }};
+const regionCounts = {{ region_counts | safe }};
+const regionValues = {{ region_values | safe }};
+const statusLabels = {{ status_labels | safe }};
+const statusCounts = {{ status_counts | safe }};
+const statusValues = {{ status_values | safe }};
+
+const colors = {
+  blue: '#0a1f3d',
+  navy: '#003462',
+  green: '#059669',
+  amber: '#d97706',
+  red: '#e11d48',
+};
+
+// Region Count Chart
+new Chart(document.getElementById('regionChart'), {
+  type: 'bar',
+  data: {
+    labels: regionLabels,
+    datasets: [{
+      label: 'عدد المشاريع',
+      data: regionCounts,
+      backgroundColor: colors.blue,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { drawBorder: false } } }
+  }
+});
+
+// Status Count Chart
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: statusLabels,
+    datasets: [{
+      data: statusCounts,
+      backgroundColor: [colors.green, colors.amber, colors.red, colors.blue],
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// Value by Region
+new Chart(document.getElementById('valueRegionChart'), {
+  type: 'bar',
+  data: {
+    labels: regionLabels,
+    datasets: [{
+      label: 'القيمة (ريال)',
+      data: regionValues,
+      backgroundColor: colors.navy,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { callback: v => (v/1000000).toFixed(1) + 'م' },
+        grid: { drawBorder: false }
+      }
+    }
+  }
+});
+
+// Value by Status
+new Chart(document.getElementById('valueStatusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: statusLabels,
+    datasets: [{
+      data: statusValues,
+      backgroundColor: [colors.green, colors.amber, colors.red, colors.blue],
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+</script>
+
+</body>
+</html>
