@@ -1,12 +1,16 @@
-import json, base64, re
+import json, base64, re, logging
+import tempfile
+import os
 from datetime import date
 from collections import Counter
 from pathlib import Path
-from flask import render_template, request
+from flask import render_template, request, send_file, abort
 from flask_login import login_required
 from app.blueprints.reports import reports_bp
 from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office, Project
 from app import db
+
+logger = logging.getLogger(__name__)
 
 REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
 REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
@@ -543,3 +547,117 @@ def finance():
                               traceback=traceback.format_exc(),
                               logo_nwc=_b64_logo('NWC_Logo.png'),
                               logo_alamro=_b64_logo('Alamro_Logo.png'))
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Org Chart Routes (Tasks 8-10)
+# ──────────────────────────────────────────────────────────────────────────────
+
+ORG_CHART_REGION_MAP = {
+    'asir': {'ar': 'عسير', 'file': '09_OrgChart_Asir.html'},
+    'jizan': {'ar': 'جازان', 'file': '10_OrgChart_Jizan.html'},
+    'baha': {'ar': 'الباحة', 'file': '11_OrgChart_Baha.html'},
+    'najran': {'ar': 'نجران', 'file': '12_OrgChart_Najran.html'},
+}
+
+
+@reports_bp.route('/org-chart')
+@login_required
+def org_chart_landing():
+    """Landing page: 4 region cards."""
+    regions = [
+        {'code': 'asir', 'name': 'عسير'},
+        {'code': 'jizan', 'name': 'جازان'},
+        {'code': 'baha', 'name': 'الباحة'},
+        {'code': 'najran', 'name': 'نجران'},
+    ]
+    return render_template('reports/org_chart_landing.html', regions=regions)
+
+
+@reports_bp.route('/org-chart/<region>')
+@login_required
+def org_chart_view(region):
+    """View org chart for a region."""
+    if region not in ORG_CHART_REGION_MAP:
+        abort(404)
+
+    info = ORG_CHART_REGION_MAP[region]
+    org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+    org_charts_dir = Path(__file__).parent.parent.parent / 'static' / 'org_charts'
+
+    # Ensure path is within org_charts directory (defense in depth - Issue 2)
+    if not org_chart_file.resolve().parent == org_charts_dir.resolve():
+        abort(404)
+
+    if not org_chart_file.exists():
+        abort(404)
+
+    html_content = org_chart_file.read_text(encoding='utf-8')
+
+    return render_template('reports/org_chart_view.html',
+                          region=region,
+                          region_name=info['ar'],
+                          org_chart_html=html_content)
+
+
+@reports_bp.route('/org-chart/<region>/pdf')
+@login_required
+def org_chart_pdf(region):
+    """Export org chart for a region as PDF (A3 landscape)."""
+    if region not in ORG_CHART_REGION_MAP:
+        abort(404)
+
+    info = ORG_CHART_REGION_MAP[region]
+    org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+    org_charts_dir = Path(__file__).parent.parent.parent / 'static' / 'org_charts'
+
+    # Ensure path is within org_charts directory (defense in depth)
+    if not org_chart_file.resolve().parent == org_charts_dir.resolve():
+        abort(404)
+
+    if not org_chart_file.exists():
+        abort(404)
+
+    try:
+        from playwright.sync_api import sync_playwright
+        import io
+
+        html_content = org_chart_file.read_text(encoding='utf-8')
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as tmp:
+            tmp.write(html_content)
+            tmp_html_path = tmp.name
+
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch()
+                page = browser.new_page()
+                page.goto(f'file://{tmp_html_path}')
+
+                pdf_bytes = page.pdf(
+                    format='A3',
+                    landscape=True,
+                    margin={'top': '10mm', 'bottom': '10mm', 'left': '14mm', 'right': '14mm'}
+                )
+
+                browser.close()
+
+                now = date.today().strftime('%Y-%m-%d')
+                pdf_filename = f"OrgChart_{info['ar']}_{now}.pdf"
+
+                return send_file(
+                    io.BytesIO(pdf_bytes),
+                    as_attachment=True,
+                    download_name=pdf_filename,
+                    mimetype='application/pdf'
+                )
+        finally:
+            if os.path.exists(tmp_html_path):
+                os.unlink(tmp_html_path)
+
+    except ImportError:
+        logger.error('Playwright not installed')
+        abort(503)
+    except Exception as e:
+        logger.exception(f'PDF generation failed for region {region}')
+        abort(500)
