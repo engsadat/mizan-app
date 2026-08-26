@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from app import create_app, db
 from app.models import Employee, EmployeeStatus, JobCode, Project, Nationality
+from sqlalchemy.orm import joinedload
 
 # Initialize Flask app
 app = create_app()
@@ -91,86 +92,6 @@ def load_logo(logo_path):
         return None
 
 
-def load_supporting_excel_files():
-    """
-    Load emp_sort.xlsx and Office-RE.xlsx for reference data.
-    These files are expected to exist in /home/southMizan/sources/ on production
-    or in a local Organize/ folder for development.
-    Returns: (emp_sort_data, office_re_data)
-    """
-    import openpyxl
-    import shutil
-
-    emp_sort_data = {}
-    office_re_data = {}
-
-    # Try to load emp_sort.xlsx (employee sort order/hierarchy)
-    emp_sort_paths = [
-        BASE / 'data' / 'emp_sort.xlsx',
-        BASE.parent / 'Organize' / 'emp_sort.xlsx',
-        Path('/home/southMizan/sources/emp_sort.xlsx'),
-    ]
-
-    for path in emp_sort_paths:
-        if path.exists():
-            try:
-                print(f"Loading emp_sort.xlsx from {path}")
-                # Use load_copy pattern to avoid PermissionError
-                tmp = str(path) + ".tmp.xlsx"
-                shutil.copy2(path, tmp)
-                wb = openpyxl.load_workbook(tmp, data_only=True)
-                ws = wb.active
-                # Expected: columns with employee name, reporting structure, etc.
-                for row_idx, row in enumerate(ws.iter_rows(values_only=True), 1):
-                    if row_idx == 1:
-                        continue  # Skip header
-                    if row[0]:  # If first column has data
-                        emp_sort_data[sv(row[0])] = row
-                wb.close()
-                os.remove(tmp)
-                print(f"  [OK] Loaded {len(emp_sort_data)} employee hierarchy records")
-                break
-            except Exception as e:
-                print(f"  Error loading from {path}: {e}")
-                if os.path.exists(tmp):
-                    os.remove(tmp)
-
-    # Try to load Office-RE.xlsx (office/regional engineer mapping)
-    office_re_paths = [
-        BASE / 'data' / 'Office-RE.xlsx',
-        BASE.parent / 'Organize' / 'Office-RE.xlsx',
-        Path('/home/southMizan/sources/Office-RE.xlsx'),
-    ]
-
-    for path in office_re_paths:
-        if path.exists():
-            try:
-                print(f"Loading Office-RE.xlsx from {path}")
-                tmp = str(path) + ".tmp.xlsx"
-                shutil.copy2(path, tmp)
-                wb = openpyxl.load_workbook(tmp, data_only=True)
-                ws = wb.active
-                # Expected: office name -> RE assignments
-                for row_idx, row in enumerate(ws.iter_rows(values_only=True), 1):
-                    if row_idx == 1:
-                        continue  # Skip header
-                    if row[0]:  # If first column has data
-                        office_re_data[sv(row[0])] = row
-                wb.close()
-                os.remove(tmp)
-                print(f"  [OK] Loaded {len(office_re_data)} office/RE mapping records")
-                break
-            except Exception as e:
-                print(f"  Error loading from {path}: {e}")
-                if os.path.exists(tmp):
-                    os.remove(tmp)
-
-    if not emp_sort_data:
-        print("Warning: emp_sort.xlsx not found or empty")
-    if not office_re_data:
-        print("Warning: Office-RE.xlsx not found or empty")
-
-    return emp_sort_data, office_re_data
 
 
 def load_employees():
@@ -195,8 +116,10 @@ def load_employees():
                 print("  (No statuses in database - data may not be imported yet)")
             return []
 
-        # Query employees with active status, eagerly load related objects
-        employees = Employee.query.filter_by(current_status_id=active_status.id).all()
+        # Query employees with active status, eagerly load related objects to avoid N+1 queries
+        employees = Employee.query.filter_by(current_status_id=active_status.id) \
+            .options(joinedload(Employee.job_code), joinedload(Employee.nationality)) \
+            .all()
         print(f"  [OK] Loaded {len(employees)} active employees")
         return employees
     except Exception as e:
@@ -227,7 +150,7 @@ def load_projects():
         return []
 
 
-def generate_org_chart_html(region, employees, projects, emp_sort_data, office_re_data):
+def generate_org_chart_html(region, employees, projects, nwc_logo, alamro_logo):
     """
     Generate HTML org chart for a single region.
 
@@ -242,8 +165,8 @@ def generate_org_chart_html(region, employees, projects, emp_sort_data, office_r
         region: Region name (e.g., 'عسير')
         employees: List of Employee objects
         projects: List of Project objects
-        emp_sort_data: Employee hierarchy data from emp_sort.xlsx
-        office_re_data: Office/RE mapping from Office-RE.xlsx
+        nwc_logo: Base64 data URL for NWC logo
+        alamro_logo: Base64 data URL for Al-Amro logo
 
     Returns:
         HTML string
@@ -424,9 +347,9 @@ def generate_org_chart_html(region, employees, projects, emp_sort_data, office_r
 
     # Header
     html_parts.append('  <div class="header">')
-    html_parts.append('    <img src="https://via.placeholder.com/60" alt="NWC">')
+    html_parts.append(f'    <img src="{nwc_logo or "data:image/svg+xml,%3Csvg%3E%3C/svg%3E"}" alt="NWC">')
     html_parts.append('    <div class="header-title">الهيكل التنظيمي - ' + region + '</div>')
-    html_parts.append('    <img src="https://via.placeholder.com/60" alt="Al-Amro">')
+    html_parts.append(f'    <img src="{alamro_logo or "data:image/svg+xml,%3Csvg%3E%3C/svg%3E"}" alt="Al-Amro">')
     html_parts.append('  </div>')
 
     # Container
@@ -489,7 +412,7 @@ def generate_org_chart_html(region, employees, projects, emp_sort_data, office_r
     return '\n'.join(html_parts)
 
 
-def write_org_charts(employees, projects, emp_sort_data, office_re_data):
+def write_org_charts(employees, projects, nwc_logo, alamro_logo):
     """
     Generate and write org chart HTML files for all regions.
 
@@ -502,7 +425,7 @@ def write_org_charts(employees, projects, emp_sort_data, office_re_data):
 
     for region in REGIONS:
         try:
-            html_content = generate_org_chart_html(region, employees, projects, emp_sort_data, office_re_data)
+            html_content = generate_org_chart_html(region, employees, projects, nwc_logo, alamro_logo)
             output_file = OUTPUT_DIR / REGION_FILES[region]
 
             # Write to file
@@ -542,8 +465,11 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Output directory: {OUTPUT_DIR}")
 
-    # Load supporting Excel files (optional reference data)
-    emp_sort_data, office_re_data = load_supporting_excel_files()
+    # Load logos
+    nwc_logo_path = BASE / 'NWC layout' / 'img' / 'NWC_Logo.png'
+    alamro_logo_path = BASE / 'NWC layout' / 'img' / 'Alamro_Logo.png'
+    nwc_logo = load_logo(nwc_logo_path)
+    alamro_logo = load_logo(alamro_logo_path)
 
     # Load employee data
     employees = load_employees()
@@ -557,7 +483,7 @@ def main():
         print("Warning: No active projects found")
 
     # Generate and write HTML files
-    success_count, error_count = write_org_charts(employees, projects, emp_sort_data, office_re_data)
+    success_count, error_count = write_org_charts(employees, projects, nwc_logo, alamro_logo)
 
     # Verify
     all_ok = verify_output_files()
