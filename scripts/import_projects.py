@@ -74,8 +74,11 @@ def to_bool(v):
 
 def to_float(v):
     if v is None: return 0
-    try: return float(v)
-    except: return 0
+    try:
+        s = str(v).strip().replace(',', '')
+        return float(s)
+    except:
+        return 0
 
 def to_date(v):
     if v is None: return None

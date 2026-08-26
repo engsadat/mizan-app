@@ -258,72 +258,66 @@ def emp_dashboard():
     )
 
 
-def _project_chart_data():
-    """Get project dashboard data filtered by included=True."""
+def _project_pivot_data():
+    """Get project data as pivot table: regions as columns, status as rows."""
     projects = Project.query.filter_by(included=True).all()
 
-    # Group by region and status
-    by_region = {}
-    by_status = {}
-    value_by_region = {}
-    value_by_status = {}
+    # Collect all regions and statuses
+    regions = sorted(set(p.region for p in projects if p.region))
+    statuses = sorted(set(p.project_state for p in projects if p.project_state))
 
-    for proj in projects:
-        reg = proj.region or 'غير محدد'
-        sta = proj.project_state or 'غير محدد'
-        val = proj.value or 0
+    if not regions:
+        regions = ['غير محدد']
+    if not statuses:
+        statuses = ['غير محدد']
 
-        by_region[reg] = by_region.get(reg, 0) + 1
-        by_status[sta] = by_status.get(sta, 0) + 1
-        value_by_region[reg] = value_by_region.get(reg, 0) + val
-        value_by_status[sta] = value_by_status.get(sta, 0) + val
+    # Build pivot table: status -> region -> count, value
+    pivot = {}
+    for status in statuses:
+        pivot[status] = {}
+        for region in regions:
+            count = len([p for p in projects if (p.project_state or 'غير محدد') == status and (p.region or 'غير محدد') == region])
+            value = sum(p.value or 0 for p in projects if (p.project_state or 'غير محدد') == status and (p.region or 'غير محدد') == region)
+            pivot[status][region] = {'count': count, 'value': value}
 
-    # Prepare chart data
-    regions = sorted(by_region.keys())
-    statuses = sorted(by_status.keys())
+    # Calculate totals by region
+    region_totals = {}
+    for region in regions:
+        region_totals[region] = sum(p.value or 0 for p in projects if (p.region or 'غير محدد') == region)
 
-    total_projects = len(projects)
     total_value = sum(p.value or 0 for p in projects)
 
     return {
-        'by_region': by_region,
-        'by_status': by_status,
-        'value_by_region': value_by_region,
-        'value_by_status': value_by_status,
         'regions': regions,
         'statuses': statuses,
-        'total_projects': total_projects,
+        'pivot': pivot,
+        'region_totals': region_totals,
         'total_value': total_value,
+        'total_projects': len(projects),
     }
 
 
 @reports_bp.route('/projects-dashboard')
 @login_required
 def projects_dashboard():
-    data = _project_chart_data()
+    data = _project_pivot_data()
 
-    # Format for Chart.js
+    # Prepare chart data (values by region)
     region_labels = data['regions']
-    region_counts = [data['by_region'].get(r, 0) for r in region_labels]
-    region_values = [data['value_by_region'].get(r, 0) for r in region_labels]
-
-    status_labels = data['statuses']
-    status_counts = [data['by_status'].get(s, 0) for s in status_labels]
-    status_values = [data['value_by_status'].get(s, 0) for s in status_labels]
+    region_values = [data['region_totals'].get(r, 0) for r in region_labels]
 
     logo_alamro = _b64_logo('Alamro_Logo.png')
     logo_nwc    = _b64_logo('NWC_Logo.png')
 
     return render_template(
         'reports/projects_dashboard.html',
+        regions=data['regions'],
+        statuses=data['statuses'],
+        pivot=data['pivot'],
         region_labels=json.dumps(region_labels, ensure_ascii=False),
-        region_counts=json.dumps(region_counts),
         region_values=json.dumps(region_values),
-        status_labels=json.dumps(status_labels, ensure_ascii=False),
-        status_counts=json.dumps(status_counts),
-        status_values=json.dumps(status_values),
-        total_projects=data['total_projects'],
         total_value=data['total_value'],
+        total_projects=data['total_projects'],
         logo_alamro=logo_alamro,
         logo_nwc=logo_nwc,
     )
