@@ -48,6 +48,6 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Charts: ongoing by region
 - Print/PDF support
 
-## Next (one task)
+## Next (one task) — BIG TASK, START NEW SESSION
 
-Dashboard polished. What's next? (export Excel, project detail view, more data features?)
+**Organizational Chart Report** — Build report showing project structure, management chain, roles, reporting relationships. Prefer fresh session with dedicated focus.
