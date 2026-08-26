@@ -10,6 +10,7 @@ from app import db
 
 REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
 REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
+ONGOING_STATE = 'تحت التنفيذ'
 
 
 def _b64_logo(rel_path):
