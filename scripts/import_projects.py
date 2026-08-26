@@ -63,6 +63,10 @@ COL = {
     'pumping_stations': 37,  # col AL (عدد محطة رفع/ ضخ)
 }
 
+def to_str(v):
+    if v is None: return ''
+    return str(v).strip()
+
 def to_bool(v):
     if v is None: return False
     s = str(v).lower().strip()
@@ -102,7 +106,7 @@ with app.app_context():
 
         try:
             # Get name (required)
-            name = (row[COL['name']].value or '').strip()
+            name = to_str(row[COL['name']].value)
             if not name:
                 continue
 
@@ -112,29 +116,29 @@ with app.app_context():
                 y = to_float(row[COL['y']].value),
                 network_approved = to_float(row[COL['network_approved']].value),
                 network_implemented = to_float(row[COL['network_implemented']].value),
-                operational_contract_no = (row[COL['operational_contract_no']].value or '').strip(),
-                project_number = (row[COL['project_number']].value or '').strip(),
-                po_no = (row[COL['po_no']].value or '').strip(),
+                operational_contract_no = to_str(row[COL['operational_contract_no']].value),
+                project_number = to_str(row[COL['project_number']].value),
+                po_no = to_str(row[COL['po_no']].value),
                 included = to_bool(row[COL['included']].value),
                 name = name,
                 value = to_float(row[COL['value']].value),
-                description = (row[COL['description']].value or '').strip(),
-                funding_source = (row[COL['funding_source']].value or '').strip(),
-                city = (row[COL['city']].value or '').strip(),
-                region = (row[COL['region']].value or '').strip(),
-                contractor_name = (row[COL['contractor_name']].value or '').strip(),
+                description = to_str(row[COL['description']].value),
+                funding_source = to_str(row[COL['funding_source']].value),
+                city = to_str(row[COL['city']].value),
+                region = to_str(row[COL['region']].value),
+                contractor_name = to_str(row[COL['contractor_name']].value),
                 is_shared = to_bool(row[COL['is_shared']].value),
-                re_code = (row[COL['re_code']].value or '').strip(),
-                project_status = (row[COL['project_status']].value or '').strip(),
-                project_state = (row[COL['project_state']].value or '').strip(),
+                re_code = to_str(row[COL['re_code']].value),
+                project_status = to_str(row[COL['project_status']].value),
+                project_state = to_str(row[COL['project_state']].value),
                 start_date = to_date(row[COL['start_date']].value),
                 end_date = to_date(row[COL['end_date']].value),
-                contractor = (row[COL['contractor']].value or '').strip(),
-                classification = (row[COL['classification']].value or '').strip(),
-                re_asir = (row[COL['re_asir']].value or '').strip(),
-                re_jazan = (row[COL['re_jazan']].value or '').strip(),
-                re_baha = (row[COL['re_baha']].value or '').strip(),
-                re_najran = (row[COL['re_najran']].value or '').strip(),
+                contractor = to_str(row[COL['contractor']].value),
+                classification = to_str(row[COL['classification']].value),
+                re_asir = to_str(row[COL['re_asir']].value),
+                re_jazan = to_str(row[COL['re_jazan']].value),
+                re_baha = to_str(row[COL['re_baha']].value),
+                re_najran = to_str(row[COL['re_najran']].value),
                 planned_completion = to_float(row[COL['planned_completion']].value),
                 actual_completion = to_float(row[COL['actual_completion']].value),
                 variance = to_float(row[COL['variance']].value),
