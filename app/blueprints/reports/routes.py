@@ -543,3 +543,115 @@ def finance():
                               traceback=traceback.format_exc(),
                               logo_nwc=_b64_logo('NWC_Logo.png'),
                               logo_alamro=_b64_logo('Alamro_Logo.png'))
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Org Chart Routes (Tasks 8-10)
+# ──────────────────────────────────────────────────────────────────────────────
+
+ORG_CHART_REGION_MAP = {
+    'asir': {'ar': 'عسير', 'file': '09_OrgChart_Asir.html'},
+    'jizan': {'ar': 'جازان', 'file': '10_OrgChart_Jizan.html'},
+    'baha': {'ar': 'الباحة', 'file': '11_OrgChart_Baha.html'},
+    'najran': {'ar': 'نجران', 'file': '12_OrgChart_Najran.html'},
+}
+
+
+@reports_bp.route('/org-chart')
+@login_required
+def org_chart_landing():
+    """Landing page: 4 region cards."""
+    regions = [
+        {'code': 'asir', 'name': 'عسير'},
+        {'code': 'jizan', 'name': 'جازان'},
+        {'code': 'baha', 'name': 'الباحة'},
+        {'code': 'najran', 'name': 'نجران'},
+    ]
+    return render_template('reports/org_chart_landing.html', regions=regions)
+
+
+@reports_bp.route('/org-chart/<region>')
+@login_required
+def org_chart_view(region):
+    """View org chart for a region."""
+    if region not in ORG_CHART_REGION_MAP:
+        return render_template('error.html',
+                              message='منطقة غير صحيحة'), 404
+
+    info = ORG_CHART_REGION_MAP[region]
+    org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+
+    if not org_chart_file.exists():
+        return render_template('error.html',
+                              message='ملف الهيكل التنظيمي غير متوفر'), 404
+
+    html_content = org_chart_file.read_text(encoding='utf-8')
+
+    return render_template('reports/org_chart_view.html',
+                          region=region,
+                          region_name=info['ar'],
+                          org_chart_html=html_content)
+
+
+@reports_bp.route('/org-chart/<region>/pdf')
+@login_required
+def org_chart_pdf(region):
+    """Export org chart as PDF."""
+    if region not in ORG_CHART_REGION_MAP:
+        return {'error': 'منطقة غير صحيحة'}, 404
+
+    try:
+        from playwright.sync_api import sync_playwright
+        import tempfile
+        import os
+
+        info = ORG_CHART_REGION_MAP[region]
+        org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+
+        if not org_chart_file.exists():
+            return {'error': 'ملف الهيكل التنظيمي غير متوفر'}, 404
+
+        html_content = org_chart_file.read_text(encoding='utf-8')
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as tmp_html:
+            tmp_html.write(html_content)
+            tmp_html_path = tmp_html.name
+
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch()
+                page = browser.new_page()
+                page.goto(f"file://{tmp_html_path}")
+
+                pdf_bytes = page.pdf(
+                    format='A3',
+                    landscape=True,
+                    margin={'top': '10mm', 'bottom': '10mm', 'left': '14mm', 'right': '14mm'}
+                )
+
+                browser.close()
+
+            os.unlink(tmp_html_path)
+
+            from flask import send_file
+            import io
+
+            now = date.today().strftime('%Y-%m-%d')
+            filename = f"OrgChart_{info['ar']}_{now}.pdf"
+
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        except Exception as e:
+            if os.path.exists(tmp_html_path):
+                os.unlink(tmp_html_path)
+            raise
+
+    except ImportError:
+        return {'error': 'Playwright غير متوفر. لا يمكن تصدير PDF'}, 503
+    except Exception as e:
+        return {'error': f'خطأ في إنشاء PDF: {str(e)}'}, 500

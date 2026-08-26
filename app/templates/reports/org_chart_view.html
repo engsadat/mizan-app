@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الهيكل التنظيمي — {{ region_name }} — ميزان</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f8fafc;
+      direction: rtl;
+    }
+    .toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      background: #0a1f3d;
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      gap: 12px;
+      direction: ltr;
+      box-shadow: 0 2px 8px rgba(10, 31, 61, 0.15);
+    }
+    .toolbar a, .toolbar button {
+      font-family: 'Cairo', sans-serif;
+      font-size: 13px;
+      color: white;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      padding: 6px 14px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .toolbar a:hover, .toolbar button:hover {
+      background: rgba(255, 255, 255, 0.25);
+      text-decoration: none;
+      color: white;
+    }
+    .toolbar-spacer {
+      flex: 1;
+    }
+    .toolbar-title {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .page-wrap {
+      padding-top: 48px;
+    }
+    .content-container {
+      background: white;
+      margin: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(10, 31, 61, 0.1);
+    }
+    .org-chart-content {
+      width: 100%;
+      overflow: auto;
+    }
+    /* Print styles */
+    @media print {
+      .toolbar {
+        display: none;
+      }
+      .page-wrap {
+        padding-top: 0;
+      }
+      body {
+        background: white;
+      }
+      .content-container {
+        margin: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <a href="/reports/org-chart">← العودة</a>
+  <span class="toolbar-title">الهيكل التنظيمي — {{ region_name }}</span>
+  <div class="toolbar-spacer"></div>
+  <a href="/reports/org-chart/{{ region }}/pdf" target="_blank">⬇ تحميل PDF</a>
+  <button onclick="window.print()">🖨 طباعة</button>
+</div>
+
+<div class="page-wrap">
+  <div class="content-container">
+    <div class="org-chart-content">
+      {{ org_chart_html | safe }}
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

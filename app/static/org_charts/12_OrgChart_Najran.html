@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الهيكل التنظيمي - نجران</title>
+  <style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Cairo", Arial, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+        direction: rtl;
+    }
+
+    .header {
+        background: linear-gradient(to bottom, #0a1f3d, #0071b9);
+        color: white;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        direction: ltr;
+    }
+
+    .header img {
+        height: 60px;
+    }
+
+    .header-title {
+        flex-grow: 1;
+        text-align: center;
+        direction: rtl;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .kpi {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-right: 4px solid #0071b9;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .kpi-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .kpi-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0a1f3d;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #0a1f3d;
+        border-bottom: 2px solid #0071b9;
+        padding-bottom: 10px;
+        margin: 30px 0 20px 0;
+    }
+
+    .emp-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .emp-card {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+    }
+
+    .emp-name {
+        font-weight: bold;
+        color: #0a1f3d;
+        margin-bottom: 5px;
+    }
+
+    .emp-detail {
+        font-size: 12px;
+        color: #666;
+        margin: 3px 0;
+    }
+
+    .pro-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 15px;
+    }
+
+    .pro-card {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-left: 4px solid #059669;
+        border-radius: 4px;
+        padding: 15px;
+    }
+
+    .pro-name {
+        font-weight: bold;
+        color: #0a1f3d;
+        margin-bottom: 5px;
+    }
+
+    .pro-detail {
+        font-size: 12px;
+        color: #666;
+        margin: 3px 0;
+    }
+
+    .pro-value {
+        font-weight: bold;
+        color: #059669;
+        margin-top: 10px;
+    }
+
+    @media print {
+        body {
+            background: white;
+        }
+        .container {
+            box-shadow: none;
+            max-width: 100%;
+        }
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="data:image/svg+xml,%3Csvg%3E%3C/svg%3E" alt="NWC">
+    <div class="header-title">الهيكل التنظيمي - نجران</div>
+    <img src="data:image/svg+xml,%3Csvg%3E%3C/svg%3E" alt="Al-Amro">
+  </div>
+  <div class="container">
+    <div class="summary">
+      <div class="kpi">
+        <div class="kpi-label">إجمالي الموظفين</div>
+        <div class="kpi-value">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">المشاريع النشطة</div>
+        <div class="kpi-value">0</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
