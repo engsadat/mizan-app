@@ -119,11 +119,26 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 
 **Output quality:** Professional A3 landscape, proper page breaks, all styling, specialist sections, KPI cards, cover page ✅
 
-## Next Task
+## Deployment Complete ✅ (2026-08-27)
 
-**Deploy to PythonAnywhere:**
-1. SSH to server or bash console
-2. `cd /home/southMizan/mizan-app && git pull origin master`
-3. Create data symlinks (or copy Excel files) on server
-4. Copy logos to `app/static/images/` (or use symlinks)
-5. Test: https://southmizan.pythonanywhere.com/reports/org-chart
+**Live URL:** https://southmizan.pythonanywhere.com/reports/org-chart
+
+**What's Live:**
+- Region selector (4 cards: عسير, جازان, الباحة, نجران)
+- Professional A3 org charts (1-4 pages per region + cover)
+- Hierarchical org structure (RE offices → projects → teams)
+- Print/PDF export ready
+- Cover pages with KPI cards
+- Specialist sections (color-coded by type)
+
+**Deployment Summary:**
+1. ✅ Code: GitHub commit 4157c51 (fixed duplicate routes)
+2. ✅ Data: All Excel files uploaded to server
+3. ✅ Web app: Reloaded on PythonAnywhere
+4. ✅ Routes: Using existing org_chart_landing + org_chart_view (with PDF export)
+5. ✅ Testing: Live and functional
+
+**Next Session:**
+- Monitor live usage & PDF export quality
+- If employee/project data changes: `python scripts/gen_org_chart.py` to regenerate
+- Document any user feedback or improvements needed
