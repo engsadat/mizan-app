@@ -819,9 +819,13 @@ def project_map_smart():
             if sv(row[10]).lower() != 'yes':
                 continue
 
+            # Only show ongoing projects
+            state = sv(row[23])
+            if state != 'تحت التنفيذ':
+                continue
+
             name = sv(row[12]) or 'بدون اسم'
             region = sv(row[17])
-            state = sv(row[23])
             x = sv(row[3])
             y = sv(row[4])
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>خريطة المشاريع الذكية — ميزان</title>
+  <title>خريطة المشاريع الجارية — ميزان</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -94,13 +94,13 @@
 <body>
 
 <div class="pms-header">
-  <h1>خريطة المشاريع الذكية</h1>
+  <h1>خريطة المشاريع الجارية</h1>
   <a href="/reports">← العودة</a>
 </div>
 
 <!-- KPI Strip -->
 <div class="pms-kpi-strip" id="pms-kpi-strip">
-  <div class="pms-kpi"><div class="pms-kpi-num" id="kpi-total">0</div><div class="pms-kpi-lbl">إجمالي المشاريع</div></div>
+  <div class="pms-kpi"><div class="pms-kpi-num" id="kpi-total">0</div><div class="pms-kpi-lbl">تحت التنفيذ</div></div>
   <div class="pms-kpi"><div class="pms-kpi-num" id="kpi-mapped">0</div><div class="pms-kpi-lbl">معروضة على الخريطة</div></div>
   <div class="pms-kpi"><div class="pms-kpi-num" id="kpi-missing">0</div><div class="pms-kpi-lbl">بدون إحداثيات</div></div>
   <div class="pms-kpi"><div class="pms-kpi-num" id="kpi-re">0</div><div class="pms-kpi-lbl">مهندس مقيم</div></div>
@@ -188,9 +188,6 @@ function initMap() {
     const popup = `
       <div class="pms-card" style="min-width:300px;max-width:320px;">
         <div class="pms-card-hdr" style="background:${color};">${p.name}</div>
-        <div class="pms-card-state">
-          <span class="pms-card-badge ${stateClass}">${p.state}</span>
-        </div>
         <table class="pms-card-table">
           ${p.region ? `<tr><td>📍 المنطقة</td><td>${p.region}${p.wad ? ' — ' + p.wad : ''}</td></tr>` : ''}
           ${p.type ? `<tr><td>🔧 النوع</td><td>${p.type}</td></tr>` : ''}
