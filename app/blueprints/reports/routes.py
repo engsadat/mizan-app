@@ -669,8 +669,8 @@ def org_chart_smart():
     from collections import defaultdict
     from pathlib import Path
 
-    BASE = Path(__file__).parent.parent.parent
-    DATA_DIR = BASE / 'data'
+    # Use absolute path for PythonAnywhere compatibility
+    DATA_DIR = Path('/home/southMizan/mizan-app/data')
 
     def sv(v):
         """Safe value helper."""
