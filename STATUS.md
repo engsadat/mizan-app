@@ -1,10 +1,10 @@
-# Mizan — current status (2026-08-26)
+# Mizan — current status (2026-08-27)
 
 Update this file at the end of every session. Then `git commit` + `git push`.
 Next chat: open `mizan-app` → read `CLAUDE.md` + this file → **one** task.
 Do not save status to a Claude memo.
 
-## Live (checked 2026-08-26)
+## Live (checked 2026-08-27)
 
 - URL: https://southmizan.pythonanywhere.com — **up**
 - Login page: Arabic ميزان / المنطقة الجنوبية, CSRF on, session cookie Secure + HttpOnly + SameSite=Lax
@@ -97,17 +97,33 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Current output does NOT match reference design
 - Requires significant HTML/CSS redesign to match reference appearance
 
-## Next (one task)
+## Session 4 (2026-08-27) — Org Chart Migration Complete
 
-**Redesign HTML Org Chart Generation:**
-- Study reference PDF structure (01_AS.pdf - 5 pages, professional layout)
-- Rewrite gen_org_charts.py to generate proper visual hierarchy
-- Implement card-based layout with styling to match reference
-- Test PDF output quality vs reference
+**What was done:**
+1. **Identified the gap** — Last session's Mizan script generated simple data lists, NOT professional A3 org charts
+2. **Ported reference script** — Copied proven `gen_org_chart.py` from HR/org_charts/ to Mizan
+3. **Updated all paths** — Changed from HR folder structure to Mizan server paths:
+   - Excel data: `data/source/`, `data/Organize/`
+   - Output: `app/static/org_charts/`
+   - Logos: `data/NWC layout/img/` (with fallback to `app/static/images/`)
+4. **Created data symlinks** — Linked HR Excel files + logos so no duplication
+5. **Added Flask routes** — New routes in `reports/routes.py`:
+   - `/reports/org-chart` — Region selector page
+   - `/reports/org-chart/<region>` — View org chart (loads pre-generated HTML)
+6. **Created UI template** — `org_chart_selector.html` for region selection
+7. **Tested locally** — Script generates all 4 professional org charts:
+   - عسير: 13 RE offices, 4 pages + cover
+   - جازان: 6 RE offices, 2 pages + cover
+   - الباحة: 4 RE offices, 2 pages + cover
+   - نجران: 3 RE offices, 1 page + cover
 
-**Or: Deploy Current Version to PythonAnywhere:**
-1. SSH to server (or PythonAnywhere bash console)
+**Output quality:** Professional A3 landscape, proper page breaks, all styling, specialist sections, KPI cards, cover page ✅
+
+## Next Task
+
+**Deploy to PythonAnywhere:**
+1. SSH to server or bash console
 2. `cd /home/southMizan/mizan-app && git pull origin master`
-3. `python -m playwright install chromium`
-4. Reload web app via PythonAnywhere dashboard
+3. Create data symlinks (or copy Excel files) on server
+4. Copy logos to `app/static/images/` (or use symlinks)
 5. Test: https://southmizan.pythonanywhere.com/reports/org-chart
