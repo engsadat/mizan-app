@@ -764,7 +764,10 @@ def project_map_smart():
     from collections import defaultdict, Counter
     from pathlib import Path
 
-    DATA_DIR = Path('/home/southMizan/mizan-app/data')
+    # Try local development path first, then PythonAnywhere path
+    local_data = Path(__file__).parent.parent.parent / 'data'
+    server_data = Path('/home/southMizan/mizan-app/data')
+    DATA_DIR = local_data if local_data.exists() else server_data
 
     def sv(v):
         if v is None:
