@@ -145,13 +145,25 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
         </div>
         {% endif %}
 
-        <!-- Employees -->
+        <!-- Employees grouped by job -->
         {% if re_data['employees'] %}
         <div class="sc-team">
+          {% set jobs_dict = {} %}
           {% for emp in re_data['employees'] %}
+            {% if emp['job'] not in jobs_dict %}
+              {% if jobs_dict.update({emp['job']: []}) %}{% endif %}
+            {% endif %}
+            {% if jobs_dict[emp['job']].append(emp) %}{% endif %}
+          {% endfor %}
+
+          {% for job, emps in jobs_dict.items() %}
           <div class="sc-team-cat">
-            <div class="sc-team-cat-hdr">{% if emp.job_code %}{{ emp.job_code.title }}{% else %}موظف{% endif %}</div>
-            <div class="sc-team-name" data-searchtext="{{ emp.name|lower }}">{{ emp.name }}</div>
+            <div class="sc-team-cat-hdr">{{ job }}</div>
+            <div class="sc-team-names">
+              {% for emp in emps %}
+              <div class="sc-team-name" data-searchtext="{{ emp['name']|lower }}">{{ emp['name'] }}</div>
+              {% endfor %}
+            </div>
           </div>
           {% endfor %}
         </div>
