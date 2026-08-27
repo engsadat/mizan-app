@@ -212,7 +212,12 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 
 Live URL: https://southmizan.pythonanywhere.com/reports/project-map-smart
 
-**Status:** Working — shows 132 ongoing projects with region tabs, RE filtering, KPI cards, and interactive map.
+**Status:** Working — shows 132 ongoing projects with region tabs, RE filtering, KPI cards, interactive map, and search.
+
+**Latest Fix:**
+- Search functionality enabled (commit `5db9835`)
+- Filters RE list in real-time as you type
+- Case-insensitive substring matching
 
 **Next Session:**
 - Monitor usage and gather feedback
