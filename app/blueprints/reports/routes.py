@@ -76,37 +76,6 @@ def index():
     return render_template('reports/index.html')
 
 
-@reports_bp.route('/org-chart')
-@login_required
-def org_chart_selector():
-    """Org chart region selector page."""
-    regions = [
-        {'code': 'عسير', 'name': 'عسير', 'file': '09_OrgChart_Asir.html'},
-        {'code': 'جازان', 'name': 'جازان', 'file': '10_OrgChart_Jizan.html'},
-        {'code': 'الباحة', 'name': 'الباحة', 'file': '11_OrgChart_Baha.html'},
-        {'code': 'نجران', 'name': 'نجران', 'file': '12_OrgChart_Najran.html'},
-    ]
-    return render_template('reports/org_chart_selector.html', regions=regions)
-
-
-@reports_bp.route('/org-chart/<region>')
-@login_required
-def org_chart_view(region):
-    """Serve org chart HTML for a region."""
-    valid_regions = {'عسير': '09_OrgChart_Asir.html', 'جازان': '10_OrgChart_Jizan.html',
-                     'الباحة': '11_OrgChart_Baha.html', 'نجران': '12_OrgChart_Najran.html'}
-
-    if region not in valid_regions:
-        return render_template('error.html', error='Invalid region'), 404
-
-    file_path = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / valid_regions[region]
-    if not file_path.exists():
-        return render_template('error.html', error='Org chart not found'), 404
-
-    html_content = file_path.read_text(encoding='utf-8')
-    return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
-
-
 REPORT_COLUMNS = [
     ('job',        'الوظيفة',          True),
     ('region',     'المنطقة',          True),
