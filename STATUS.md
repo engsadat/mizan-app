@@ -212,13 +212,27 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 
 Live URL: https://southmizan.pythonanywhere.com/reports/project-map-smart
 
-**Status:** Working — shows 132 ongoing projects with region tabs, RE filtering, KPI cards, interactive map, and search.
+**Status:** Working — shows 132 ongoing projects (تحت التنفيذ) with region tabs, RE filtering, KPI cards, interactive map, and search.
 
-**Latest Fix:**
-- Search functionality enabled (commit `5db9835`)
-- Filters RE list in real-time as you type
-- Case-insensitive substring matching
+**Session 6 Summary:**
+- ✅ Built Smart Project Map with Leaflet interactive map
+- ✅ Filtered to ongoing projects only (132 total, 124 mapped, 8 missing coords)
+- ✅ Added search/filter for RE names (real-time, case-insensitive)
+- ✅ Deployed to live server
+- ❌ Attempted Projects → DB migration but hit PythonAnywhere environment issues
+- ✅ **Decision:** Keep Excel as project data source (working fine, no sync needed)
+
+**Data Strategy (Current):**
+- Employees: DB (Mizan) + multiple reports
+- Projects: Excel (shared file) + 1 report (map)
+- Both approaches working independently ✅
+
+**When to revisit DB for Projects:**
+- If/when need 3+ different project reports (financial, timeline, risk, KPIs)
+- Currently 1 map report is sufficient
+- Excel is easier to maintain with shared editing
 
 **Next Session:**
-- Monitor usage and gather feedback
-- Consider additional features if needed
+- Monitor live usage
+- Build additional reports if needed (finance, risk, etc.)
+- Revisit database migration if report scenarios multiply
