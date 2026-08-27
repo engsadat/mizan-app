@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الهيكل التنظيمي الذكي — ميزان</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#002060; --blue:#0071B9; --sky:#00A7E2; --teal:#03A88B;
+  --amber:#d97706; --red:#C00000; --gray:#72808A;
+  --lb:#e8f4fd; --lg:#f5f7fa; --bd:#d1d9e6;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: 'Cairo', sans-serif; direction: rtl; font-size: 11px; color: var(--navy); background: #f5f7fa; }
+body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
+
+/* Header */
+.sc-header { background: var(--navy); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.sc-header h1 { font-size: 15px; font-weight: 900; }
+.sc-header a { color: #fff; text-decoration: none; font-size: 12px; }
+.sc-header a:hover { text-decoration: underline; }
+
+/* Tabs */
+.sc-tabs { background: #fff; border-bottom: 2px solid var(--blue); display: flex; padding: 0 20px; gap: 2px; position: sticky; top: 0; z-index: 10; }
+.sc-tab { padding: 8px 20px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 4px 4px 0 0; margin-top: 4px; color: var(--gray); border: 1px solid transparent; border-bottom: none; transition: background .15s; }
+.sc-tab:hover { background: var(--lb); color: var(--blue); }
+.sc-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+/* Region section */
+.region-section { display: none; padding: 14px 20px; }
+.region-section.active { display: block; }
+
+/* KPI strip */
+.sc-kpis { display: flex; gap: 10px; margin-bottom: 14px; }
+.sc-kpi { flex: 1; background: #fff; border: 1px solid var(--bd); border-radius: 8px; padding: 12px 10px; text-align: center; border-top-width: 4px; border-top-style: solid; border-top-color: var(--blue); }
+.sc-kpi-num { font-size: 32px; font-weight: 900; line-height: 1; }
+.sc-kpi-lbl { font-size: 9px; color: var(--gray); margin-top: 4px; }
+
+/* Search bar */
+.sc-search-wrap { display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid var(--blue); border-radius: 8px; padding: 7px 14px; margin-bottom: 14px; }
+.sc-search-wrap input { border: none; outline: none; flex: 1; font-size: 12px; font-family: inherit; direction: rtl; color: var(--navy); background: transparent; }
+.sc-search-icon { color: var(--gray); font-size: 14px; flex-shrink: 0; }
+.sc-search-count { font-size: 9px; color: var(--gray); white-space: nowrap; flex-shrink: 0; }
+.sc-search-clear { font-size: 12px; color: var(--gray); cursor: pointer; flex-shrink: 0; display: none; }
+.sc-search-clear.visible { display: block; }
+
+/* Card grid */
+.sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 10px; }
+
+/* RE Card */
+.sc-card { background: #fff; border: 1px solid var(--bd); border-top: 3px solid var(--blue); border-radius: 8px; overflow: hidden; transition: box-shadow .15s; }
+.sc-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.sc-card.sc-hidden { display: none; }
+
+.sc-card-hdr { background: var(--lg); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.sc-card-hdr:hover { background: var(--lb); }
+.sc-card-title { display: flex; flex-direction: column; gap: 2px; }
+.sc-card-office { font-size: 12px; font-weight: 900; color: var(--navy); }
+.sc-card-re { font-size: 10px; font-weight: 700; color: var(--blue); }
+.sc-toggle { font-size: 9px; font-weight: 700; color: var(--blue); background: #fff; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--blue); white-space: nowrap; flex-shrink: 0; }
+
+.sc-card-counts { padding: 7px 12px; display: flex; gap: 14px; font-size: 10px; border-bottom: 1px solid var(--bd); }
+.sc-card-counts b { font-size: 12px; }
+
+/* Expandable body */
+.sc-card-body { display: none; padding: 10px 12px; max-height: 400px; overflow-y: auto; }
+.sc-card.open .sc-card-body { display: block; }
+
+/* Projects list */
+.sc-proj-label { font-size: 9px; font-weight: 900; color: var(--gray); margin-bottom: 5px; border-bottom: 1px solid var(--bd); padding-bottom: 3px; }
+.sc-proj-list { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+.sc-proj-item { background: var(--lg); border-radius: 3px; padding: 3px 8px 3px 4px; font-size: 10px; border-right: 3px solid var(--blue); line-height: 1.4; }
+
+/* Team by category */
+.sc-team { margin-bottom: 10px; }
+.sc-team-cat { margin-bottom: 6px; }
+.sc-team-cat-hdr { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 9px; border-radius: 10px; border: 1px solid var(--blue); color: var(--blue); white-space: nowrap; margin-bottom: 3px; }
+.sc-team-names { display: flex; flex-wrap: wrap; gap: 3px; }
+.sc-team-name { font-size: 9px; color: var(--navy); background: var(--lb); padding: 1px 7px; border-radius: 3px; border: 1px solid var(--bd); }
+
+/* Search highlight */
+.sc-hl { background: #fef08a; color: var(--navy); border-radius: 2px; padding: 0 1px; }
+
+/* Footer */
+.sc-footer { background: var(--lg); border-top: 1px solid var(--bd); padding: 6px 20px; display: flex; justify-content: space-between; font-size: 9px; color: var(--gray); margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="sc-header">
+  <h1>الهيكل التنظيمي الذكي</h1>
+  <a href="/reports">← العودة</a>
+</div>
+
+<div class="sc-tabs">
+  {% for region in regions %}
+  <div class="sc-tab {% if loop.first %}active{% endif %}" onclick="switchTab(this)">{{ region }}</div>
+  {% endfor %}
+</div>
+
+{% for region in regions %}
+<div class="region-section {% if loop.first %}active{% endif %}" data-region="{{ region }}">
+  <!-- KPIs -->
+  <div class="sc-kpis">
+    <div class="sc-kpi"><div class="sc-kpi-num">{{ kpis[region]['emp'] }}</div><div class="sc-kpi-lbl">موظف</div></div>
+    <div class="sc-kpi"><div class="sc-kpi-num">{{ kpis[region]['proj'] }}</div><div class="sc-kpi-lbl">مشروع</div></div>
+    <div class="sc-kpi"><div class="sc-kpi-num">{{ kpis[region]['con'] }}</div><div class="sc-kpi-lbl">مقاول</div></div>
+    <div class="sc-kpi"><div class="sc-kpi-num">{{ kpis[region]['re'] }}</div><div class="sc-kpi-lbl">مكتب إشراف</div></div>
+  </div>
+
+  <!-- Search -->
+  <div class="sc-search-wrap">
+    <span class="sc-search-icon">🔍</span>
+    <input type="text" placeholder="ابحث عن مهندس أو مشروع..." oninput="filterCards(this)">
+    <span class="sc-search-count"></span>
+    <span class="sc-search-clear" onclick="clearSearch(this)">✕</span>
+  </div>
+
+  <!-- RE Cards -->
+  <div class="sc-grid">
+    {% for re_name, re_data in data[region].items() %}
+    <div class="sc-card" data-searchtext="{{ re_name|lower }}">
+      <div class="sc-card-hdr" onclick="toggleCard(this)">
+        <div class="sc-card-title">
+          <div class="sc-card-office">{{ re_name }}</div>
+          <div class="sc-card-re">م/ {{ re_name }}</div>
+        </div>
+        <div class="sc-toggle">{{ re_data['employees']|length + re_data['projects']|length }}</div>
+      </div>
+
+      <div class="sc-card-counts">
+        <div><b>{{ re_data['employees']|length }}</b> موظف</div>
+        <div><b>{{ re_data['projects']|length }}</b> مشروع</div>
+      </div>
+
+      <div class="sc-card-body">
+        <!-- Projects -->
+        {% if re_data['projects'] %}
+        <div class="sc-proj-label">المشاريع</div>
+        <div class="sc-proj-list">
+          {% for proj in re_data['projects'][:3] %}
+          <div class="sc-proj-item" data-searchtext="{{ proj.project_name|lower }}">{{ proj.project_name }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Employees -->
+        {% if re_data['employees'] %}
+        <div class="sc-team">
+          {% for emp in re_data['employees'] %}
+          <div class="sc-team-cat">
+            <div class="sc-team-cat-hdr">{% if emp.job_code %}{{ emp.job_code.title }}{% else %}موظف{% endif %}</div>
+            <div class="sc-team-name" data-searchtext="{{ emp.name|lower }}">{{ emp.name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="sc-footer">
+  <span>ميزان — المنطقة الجنوبية</span>
+  <span>{{ now }}</span>
+</div>
+
+<script>
+function switchTab(tab) {
+  const tabs = tab.parentElement.querySelectorAll('.sc-tab');
+  const sections = document.querySelectorAll('.region-section');
+  tabs.forEach(t => t.classList.remove('active'));
+  sections.forEach(s => s.classList.remove('active'));
+  tab.classList.add('active');
+  document.querySelector(`[data-region="${tab.textContent}"]`).classList.add('active');
+}
+
+function toggleCard(hdr) {
+  hdr.closest('.sc-card').classList.toggle('open');
+}
+
+function filterCards(inp) {
+  const q = inp.value.toLowerCase().trim();
+  const section = inp.closest('.region-section');
+  const cards = section.querySelectorAll('.sc-card');
+  let count = 0;
+
+  cards.forEach(card => {
+    const text = card.getAttribute('data-searchtext') || '';
+    const matches = text.includes(q) || q === '';
+    card.classList.toggle('sc-hidden', !matches);
+    if (matches && q) count++;
+  });
+
+  const countEl = section.querySelector('.sc-search-count');
+  const clearBtn = section.querySelector('.sc-search-clear');
+  if (q) {
+    countEl.textContent = `${count} نتيجة`;
+    clearBtn.classList.add('visible');
+  } else {
+    countEl.textContent = '';
+    clearBtn.classList.remove('visible');
+  }
+}
+
+function clearSearch(btn) {
+  const inp = btn.closest('.sc-search-wrap').querySelector('input');
+  inp.value = '';
+  filterCards(inp);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.sc-tab')[0].click();
+});
+</script>
+</body>
+</html>

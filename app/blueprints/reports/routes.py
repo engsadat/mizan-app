@@ -657,3 +657,55 @@ def org_chart_view(region):
 #         return {'error': 'Playwright غير متوفر. لا يمكن تصدير PDF'}, 503
 #     except Exception as e:
 #         return {'error': f'خطأ في إنشاء PDF: {str(e)}'}, 500
+
+
+# ─── SMART CHART (Interactive Dynamic Org Chart) ───────────────────────────────
+
+@reports_bp.route('/org-chart-smart')
+@login_required
+def org_chart_smart():
+    """Interactive dynamic org chart — live from database."""
+    from collections import defaultdict
+
+    # Load all active employees grouped by RE name and region
+    employees = db.session.query(Employee).join(
+        EmployeeStatus, Employee.current_status_id == EmployeeStatus.id
+    ).outerjoin(JobCode, Employee.job_code_id == JobCode.id).filter(
+        EmployeeStatus.name_ar == 'على قوة العمل'
+    ).all()
+
+    # Load active projects
+    projects = db.session.query(Project).filter(
+        Project.included == True,
+        Project.project_state == ONGOING_STATE
+    ).all()
+
+    # Organize by region and RE
+    data_by_region = defaultdict(lambda: defaultdict(lambda: {'employees': [], 'projects': []}))
+
+    for emp in employees:
+        if emp.region and emp.responsible_engineer:
+            region = emp.region
+            re_name = emp.responsible_engineer
+            data_by_region[region][re_name]['employees'].append(emp)
+
+    for proj in projects:
+        if proj.region and proj.re_general:
+            region = proj.region
+            re_name = proj.re_general
+            data_by_region[region][re_name]['projects'].append(proj)
+
+    # Calculate KPIs per region
+    region_kpis = {}
+    for region in REGIONS:
+        res = data_by_region[region]
+        total_emp = sum(len(data['employees']) for data in res.values())
+        total_proj = sum(len(data['projects']) for data in res.values())
+        total_con = len({proj.contractor_name for projs in res.values() for proj in projs['projects'] if proj.contractor_name})
+        total_re = len(res)
+        region_kpis[region] = {'emp': total_emp, 'proj': total_proj, 'con': total_con, 're': total_re}
+
+    return render_template('reports/org_chart_smart.html',
+                         regions=REGIONS,
+                         data=dict(data_by_region),
+                         kpis=region_kpis)
