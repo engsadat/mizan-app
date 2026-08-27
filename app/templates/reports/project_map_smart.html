@@ -122,7 +122,7 @@
       <div>المهندسون: <b id="region-res">0</b></div>
     </div>
     <div class="pms-search">
-      <input type="text" id="pms-search" placeholder="ابحث عن مهندس...">
+      <input type="text" id="pms-search" placeholder="ابحث عن مهندس..." oninput="filterBySearch(this.value)">
     </div>
     <button id="pms-reset" onclick="resetFilter()">إعادة عرض الكل</button>
     <div id="pms-re-list"></div>
@@ -384,6 +384,21 @@ function resetFilter() {
 function toggleMissing() {
   const table = document.getElementById('pms-missing-table');
   table.style.display = table.style.display === 'none' ? 'table' : 'none';
+}
+
+// Search/filter by RE name
+function filterBySearch(query) {
+  const lowerQuery = query.toLowerCase();
+  const reRows = document.querySelectorAll('.pms-re-row');
+
+  reRows.forEach(row => {
+    const reLabel = row.querySelector('.re-label').textContent.toLowerCase();
+    if (reLabel.includes(lowerQuery)) {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
+  });
 }
 
 // Initialize on load
