@@ -175,6 +175,28 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Monitor live usage and user feedback
 - Consider performance optimizations if needed
 
+## Session 7 (2026-08-27) — Smart Chart Projects Fixed ✅
+
+**One Task Completed:**
+- Fixed Smart Chart org chart — projects now display correctly
+
+**Issues Fixed:**
+1. Template bug: Changed `proj.project_name` → `proj['name']` (dict key access)
+2. Route path bug: Fixed data directory path calculation (was offset by 1 level)
+3. Route fallback: Added local path check before server path
+
+**Result:**
+- All 194 projects now display in Smart Chart org chart across 26 REs
+- KPI cards show correct project counts per region (93 عسير, 47 جازان, 35 الباحة, etc.)
+- Projects visible in expanded RE cards
+
+**Commits:**
+- `01097a3`: Template fix
+- `6413970`: Route path fix (local dev fallback)
+- `020836e`: Combined final fix with debug cleanup
+
+**Next:** Reload web app on PythonAnywhere
+
 ## Session 6 (2026-08-27) — Smart Project Map Complete ✅
 
 **One Task Completed:**
