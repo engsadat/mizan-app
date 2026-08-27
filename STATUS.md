@@ -138,7 +138,31 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 4. ✅ Routes: Using existing org_chart_landing + org_chart_view (with PDF export)
 5. ✅ Testing: Live and functional
 
+## Session 5 (2026-08-27) — Dynamic Smart Chart Added
+
+**One Task Completed:**
+- Added **interactive dynamic org chart** (`/reports/org-chart-smart`)
+- Features:
+  - Tab-based navigation by region (عسير, جازان, الباحة, نجران)
+  - KPI cards per region (employees, projects, contractors, offices)
+  - Search/filter with real-time results
+  - Collapsible RE office cards
+  - Employees grouped by job category
+  - Live data from Mizan database (real-time queries, not pre-generated)
+  - Responsive grid layout
+  - Mobile-friendly
+
+**Code:**
+- Route: `/reports/org-chart-smart` in `reports/routes.py`
+- Template: `org_chart_smart.html` (281 lines, JavaScript interactivity)
+- Linked in reports index alongside static A3 charts
+- Commit: `230322c`
+
+**Two Org Chart Options Now Live:**
+1. **Static A3 Charts** — `/reports/org-chart` (print/PDF optimized, pre-generated)
+2. **Smart Chart** — `/reports/org-chart-smart` (interactive, real-time, searchable)
+
 **Next Session:**
-- Monitor live usage & PDF export quality
-- If employee/project data changes: `python scripts/gen_org_chart.py` to regenerate
-- Document any user feedback or improvements needed
+- Deploy to PythonAnywhere (git pull + reload)
+- Test both org chart versions
+- Monitor performance with live user feedback
