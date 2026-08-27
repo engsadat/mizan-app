@@ -174,3 +174,40 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 **Next Session:**
 - Monitor live usage and user feedback
 - Consider performance optimizations if needed
+
+## Session 6 (2026-08-27) — Smart Project Map Complete ✅
+
+**One Task Completed:**
+- Built **interactive Smart Project Map** (`/reports/project-map-smart`)
+
+**Features:**
+- ✅ Tab-based navigation by region (عسير, جازان, الباحة, نجران)
+- ✅ KPI cards per region (total, mapped, missing, RE count)
+- ✅ Interactive Leaflet map with color-coded markers by RE
+- ✅ Sidebar with searchable RE list + project counts
+- ✅ Collapsible missing coordinates table
+- ✅ Complete data from Excel source (project_2026_database_ver1_updated.xlsx)
+- ✅ Responsive design matching Smart Chart UI style
+- ✅ Cairo font, RTL Arabic, NWC branding
+
+**Implementation:**
+- Route: `/reports/project-map-smart` (loads Excel, renders interactive map)
+- Template: `project_map_smart.html` (Leaflet + Tabs + Search)
+- Reports index: Updated with new card linking to feature
+- Commits: `afc3f2a` (initial), `f9ae4d0` (path fix)
+
+**Deployment Status:**
+- Code: Pushed to GitHub master (commit `f9ae4d0`)
+- Excel data: Available on PythonAnywhere at `/home/southMizan/mizan-app/data/`
+- Testing: Local testing passed — data loads correctly
+- **PENDING:** Manual deployment to PythonAnywhere (see steps below)
+
+**Deployment Steps (manual):**
+1. SSH into PythonAnywhere: `ssh southmizan@ssh.pythonanywhere.com`
+2. Pull latest: `cd ~/mizan-app && git pull origin master`
+3. Reload web app: Go to PythonAnywhere dashboard → Web → Reload southmizan.pythonanywhere.com
+
+**Next Session:**
+- Deploy to live (manual SSH + reload)
+- Test on live URL: https://southmizan.pythonanywhere.com/reports/project-map-smart
+- Monitor for any runtime issues
