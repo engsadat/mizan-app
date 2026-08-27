@@ -140,7 +140,7 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
         <div class="sc-proj-label">المشاريع</div>
         <div class="sc-proj-list">
           {% for proj in re_data['projects'][:3] %}
-          <div class="sc-proj-item" data-searchtext="{{ proj.project_name|lower }}">{{ proj.project_name }}</div>
+          <div class="sc-proj-item" data-searchtext="{{ proj['name']|lower }}">{{ proj['name'] }}</div>
           {% endfor %}
         </div>
         {% endif %}
