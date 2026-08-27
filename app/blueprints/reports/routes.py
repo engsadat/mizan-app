@@ -670,7 +670,7 @@ def org_chart_smart():
     from pathlib import Path
 
     # Try local development path first, then PythonAnywhere path
-    local_data = Path(__file__).parent.parent.parent / 'data'
+    local_data = Path(__file__).parent.parent.parent.parent / 'data'
     server_data = Path('/home/southMizan/mizan-app/data')
     DATA_DIR = local_data if local_data.exists() else server_data
 
@@ -767,7 +767,7 @@ def project_map_smart():
     from pathlib import Path
 
     # Try local development path first, then PythonAnywhere path
-    local_data = Path(__file__).parent.parent.parent / 'data'
+    local_data = Path(__file__).parent.parent.parent.parent / 'data'
     server_data = Path('/home/southMizan/mizan-app/data')
     DATA_DIR = local_data if local_data.exists() else server_data
 
