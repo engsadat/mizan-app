@@ -754,3 +754,141 @@ def org_chart_smart():
 
     except Exception as e:
         return f'<h1>خطأ في تحميل البيانات</h1><p>{str(e)}</p>', 500
+
+
+@reports_bp.route('/project-map-smart')
+@login_required
+def project_map_smart():
+    """Interactive project map by RE — live from Excel sources."""
+    import openpyxl, shutil, os, json
+    from collections import defaultdict, Counter
+    from pathlib import Path
+
+    DATA_DIR = Path('/home/southMizan/mizan-app/data')
+
+    def sv(v):
+        if v is None:
+            return ''
+        s = str(v).strip()
+        err_vals = {'#REF!', '=#REF!', '#VALUE!', '#N/A', '#NAME?', '#DIV/0!', '#NULL!', '#NUM!'}
+        return '' if s in err_vals else s
+
+    def load_copy(path):
+        tmp = str(path) + '.tmp.xlsx'
+        shutil.copy2(path, tmp)
+        wb = openpyxl.load_workbook(tmp, data_only=True)
+        os.remove(tmp)
+        return wb
+
+    def fmt_date(v):
+        s = sv(v)
+        if not s:
+            return ''
+        return s[:10] if len(s) >= 10 else s
+
+    def fmt_value(v):
+        s = sv(v)
+        try:
+            return f'{float(s):,.0f} ريال'
+        except (ValueError, TypeError):
+            return s
+
+    try:
+        # Region-RE column mapping
+        REGION_RE_COL = {'عسير': 30, 'جازان': 31, 'الباحة': 32, 'نجران': 33}
+        REGION_COLOR = {
+            'عسير': '#00A7E2',
+            'جازان': '#03A88B',
+            'الباحة': '#FFC000',
+            'نجران': '#C00000',
+        }
+
+        # Load projects
+        wb = load_copy(DATA_DIR / 'source' / 'project_2026_database_ver1_updated.xlsx')
+        ws = wb['pro']
+
+        points = []
+        missing = []
+        region_re_order = defaultdict(list)
+        region_re_set = defaultdict(dict)
+
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if sv(row[10]).lower() != 'yes':
+                continue
+
+            name = sv(row[12]) or 'بدون اسم'
+            region = sv(row[17])
+            state = sv(row[23])
+            x = sv(row[3])
+            y = sv(row[4])
+
+            re_col = REGION_RE_COL.get(region)
+            re = sv(row[re_col]) if re_col else ''
+            if not re:
+                re = sv(row[21]) or 'غير محدد'
+
+            if re not in region_re_set[region]:
+                region_re_set[region][re] = len(region_re_order[region])
+                region_re_order[region].append(re)
+
+            entry = {
+                'name': name,
+                'region': region,
+                'state': state,
+                're': re,
+                'wad': sv(row[16]),
+                'type': sv(row[28]),
+                'contractor': sv(row[18]),
+                'start': fmt_date(row[24]),
+                'end': fmt_date(row[25]),
+                'value': fmt_value(row[29]),
+                'po': sv(row[9]),
+            }
+
+            try:
+                lon, lat = float(x), float(y)
+                if lon == 0 or lat == 0:
+                    raise ValueError
+                entry.update({'lat': lat, 'lon': lon})
+                points.append(entry)
+            except (ValueError, TypeError):
+                missing.append(entry)
+
+        # Build RE color map
+        PALETTE = [
+            '#E63946', '#2196F3', '#4CAF50', '#FF9800', '#9C27B0',
+            '#00BCD4', '#FF5722', '#8BC34A', '#3F51B5', '#FFC107',
+            '#009688', '#E91E63', '#795548', '#607D8B',
+        ]
+        re_color = {}
+        for region, re_list in region_re_order.items():
+            for i, re in enumerate(re_list):
+                re_color[re] = PALETTE[i % len(PALETTE)]
+
+        # RE project counts
+        re_count = Counter(p['re'] for p in points)
+        region_count_by_re = defaultdict(Counter)
+        for p in points:
+            region_count_by_re[p['region']][p['re']] += 1
+
+        # Calculate KPIs per region
+        region_count = Counter(p['region'] for p in points)
+        kpis = {}
+        for region in REGIONS:
+            kpis[region] = {
+                'total': region_count.get(region, 0),
+                'mapped': sum(1 for p in points if p['region'] == region),
+                'missing': sum(1 for p in missing if p['region'] == region),
+                're_count': len(region_re_order.get(region, [])),
+            }
+
+        return render_template('reports/project_map_smart.html',
+                             regions=REGIONS,
+                             points=points,
+                             missing=missing,
+                             re_color=re_color,
+                             region_color=REGION_COLOR,
+                             kpis=kpis)
+
+    except Exception as e:
+        return f'<h1>خطأ في تحميل المشاريع</h1><p>{str(e)}</p>', 500
