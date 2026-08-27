@@ -202,6 +202,12 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Testing: Local testing passed — data loads correctly
 - **PENDING:** Manual deployment to PythonAnywhere (see steps below)
 
+**Filter Applied (Session 6 update):**
+- Shows **only ongoing projects** (حالة المشروع = تحت التنفيذ)
+- 132 ongoing projects in database (124 with coordinates, 8 missing)
+- Simplified card display (removed state badge since all are ongoing)
+- Updated labels to reflect ongoing-only scope
+
 **Deployment Steps (manual):**
 1. SSH into PythonAnywhere: `ssh southmizan@ssh.pythonanywhere.com`
 2. Pull latest: `cd ~/mizan-app && git pull origin master`
