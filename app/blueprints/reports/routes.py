@@ -664,61 +664,93 @@ def org_chart_view(region):
 @reports_bp.route('/org-chart-smart')
 @login_required
 def org_chart_smart():
-    """Interactive dynamic org chart — live from database."""
+    """Interactive dynamic org chart — live from Excel sources (same as static charts)."""
+    import openpyxl, shutil, os
     from collections import defaultdict
+    from pathlib import Path
 
-    # Region to project RE column mapping
-    re_columns = {
-        'عسير': 're_asir',
-        'جازان': 're_jazan',
-        'الباحة': 're_baha',
-        'نجران': 're_najran',
-    }
+    BASE = Path(__file__).parent.parent.parent
+    DATA_DIR = BASE / 'data'
 
-    # Load all active employees
-    employees = db.session.query(Employee).join(
-        EmployeeStatus, Employee.current_status_id == EmployeeStatus.id
-    ).outerjoin(JobCode, Employee.job_code_id == JobCode.id).filter(
-        EmployeeStatus.name_ar == 'على قوة العمل'
-    ).all()
+    def sv(v):
+        """Safe value helper."""
+        if v is None:
+            return ''
+        s = str(v).strip()
+        err_vals = {'#REF!', '=#REF!', '#VALUE!', '#N/A', '#NAME?', '#DIV/0!', '#NULL!', '#NUM!'}
+        return '' if s in err_vals else s
 
-    # Load active projects
-    projects = db.session.query(Project).filter(
-        Project.included == True,
-        Project.project_state == ONGOING_STATE
-    ).all()
+    def load_copy(path):
+        """Load Excel safely (copy to temp, avoid lock)."""
+        tmp = str(path) + '.tmp.xlsx'
+        shutil.copy2(path, tmp)
+        wb = openpyxl.load_workbook(tmp, data_only=True)
+        os.remove(tmp)
+        return wb
 
-    # Organize by region and RE
-    data_by_region = defaultdict(lambda: defaultdict(lambda: {'employees': [], 'projects': []}))
+    # Load Excel data
+    try:
+        # RE directory
+        wb_re = load_copy(DATA_DIR / 'Organize' / 'Office-RE.xlsx')
+        ws_re = wb_re['RE_Mail']
+        re_info = {}
+        for row in ws_re.iter_rows(min_row=2, max_row=ws_re.max_row, values_only=True):
+            name = sv(row[1])
+            region = sv(row[4])
+            oname = sv(row[8])
+            phone = sv(row[3])
+            if name and region:
+                re_info[name] = {'region': region, 'office': oname, 'phone': phone}
 
-    # Group employees by region and direct_manager (RE name)
-    for emp in employees:
-        if emp.region and emp.direct_manager:
-            region = emp.region
-            re_name = emp.direct_manager
-            data_by_region[region][re_name]['employees'].append(emp)
+        # Employees
+        wb_emp = load_copy(DATA_DIR / 'source' / 'employees data source.xlsx')
+        ws_emp = wb_emp['data']
+        emp_by_re = defaultdict(list)
+        for row in ws_emp.iter_rows(min_row=2, max_row=ws_emp.max_row, values_only=True):
+            if sv(row[11]) != 'على قوة العمل':
+                continue
+            re_name = sv(row[27])
+            emp_name = sv(row[20])
+            job = sv(row[21])
+            region = sv(row[16])
+            if re_name and emp_name:
+                emp_by_re[re_name].append({'name': emp_name, 'job': job, 'region': region})
 
-    # Group projects by region and RE column
-    for proj in projects:
-        if proj.region:
-            region = proj.region
-            re_col = re_columns.get(region)
-            if re_col:
-                re_name = getattr(proj, re_col, None)
-                if re_name:
-                    data_by_region[region][re_name]['projects'].append(proj)
+        # Projects
+        wb_pro = load_copy(DATA_DIR / 'source' / 'project_2026_database_ver1_updated.xlsx')
+        ws_pro = wb_pro['pro']
+        proj_by_re = defaultdict(list)
+        region_col = {'عسير': 30, 'جازان': 31, 'الباحة': 32, 'نجران': 33}
+        for row in ws_pro.iter_rows(min_row=2, max_row=ws_pro.max_row, values_only=True):
+            if not (row[10] and str(row[10]).lower() == 'yes'):
+                continue
+            proj_name = sv(row[12])
+            status = sv(row[23])
+            for region, cidx in region_col.items():
+                re_name = sv(row[cidx])
+                if re_name and proj_name:
+                    proj_by_re[re_name].append({'name': proj_name, 'status': status, 'region': region})
 
-    # Calculate KPIs per region
-    region_kpis = {}
-    for region in REGIONS:
-        res = data_by_region[region]
-        total_emp = sum(len(data['employees']) for data in res.values())
-        total_proj = sum(len(data['projects']) for data in res.values())
-        total_con = len({proj.contractor_name for data in res.values() for proj in data['projects'] if proj.contractor_name})
-        total_re = len(res)
-        region_kpis[region] = {'emp': total_emp, 'proj': total_proj, 'con': total_con, 're': total_re}
+        # Organize by region
+        data_by_region = defaultdict(lambda: defaultdict(lambda: {'employees': [], 'projects': []}))
+        for re_name, info in re_info.items():
+            region = info['region']
+            data_by_region[region][re_name]['employees'] = emp_by_re.get(re_name, [])
+            data_by_region[region][re_name]['projects'] = proj_by_re.get(re_name, [])
 
-    return render_template('reports/org_chart_smart.html',
-                         regions=REGIONS,
-                         data=dict(data_by_region),
-                         kpis=region_kpis)
+        # Calculate KPIs
+        region_kpis = {}
+        for region in REGIONS:
+            res = data_by_region[region]
+            total_emp = sum(len(d['employees']) for d in res.values())
+            total_proj = sum(len(d['projects']) for d in res.values())
+            total_con = len({p['name'] for d in res.values() for p in d['projects']})
+            region_kpis[region] = {'emp': total_emp, 'proj': total_proj, 'con': total_con, 're': len(res)}
+
+        return render_template('reports/org_chart_smart.html',
+                             regions=REGIONS,
+                             data=dict(data_by_region),
+                             kpis=region_kpis)
+
+    except Exception as e:
+        return f'<h1>خطأ في تحميل البيانات</h1><p>{str(e)}</p>', 500
