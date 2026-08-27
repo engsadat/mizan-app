@@ -87,9 +87,9 @@
     <p>اختر المنطقة لعرض الهيكل التنظيمي والمشاريع والموظفين</p>
   </div>
 
-  <div class="row g-3 p-4 bg-white">
+  <div class="row g-4 p-4 bg-white">
     {% for region in regions %}
-    <div class="col-md-6">
+    <div class="col-6 col-sm-6 col-md-6">
       <a href="/reports/org-chart/{{ region.code }}" class="region-card">
         <div class="region-icon">🏢</div>
         <div class="region-name">{{ region.name }}</div>
