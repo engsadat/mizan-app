@@ -208,12 +208,12 @@ Projects dashboard live: https://southmizan.pythonanywhere.com/reports/projects-
 - Simplified card display (removed state badge since all are ongoing)
 - Updated labels to reflect ongoing-only scope
 
-**Deployment Steps (manual):**
-1. SSH into PythonAnywhere: `ssh southmizan@ssh.pythonanywhere.com`
-2. Pull latest: `cd ~/mizan-app && git pull origin master`
-3. Reload web app: Go to PythonAnywhere dashboard → Web → Reload southmizan.pythonanywhere.com
+## Deployed ✅ (2026-08-27)
+
+Live URL: https://southmizan.pythonanywhere.com/reports/project-map-smart
+
+**Status:** Working — shows 132 ongoing projects with region tabs, RE filtering, KPI cards, and interactive map.
 
 **Next Session:**
-- Deploy to live (manual SSH + reload)
-- Test on live URL: https://southmizan.pythonanywhere.com/reports/project-map-smart
-- Monitor for any runtime issues
+- Monitor usage and gather feedback
+- Consider additional features if needed
