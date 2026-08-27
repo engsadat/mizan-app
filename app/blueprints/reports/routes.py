@@ -667,7 +667,15 @@ def org_chart_smart():
     """Interactive dynamic org chart — live from database."""
     from collections import defaultdict
 
-    # Load all active employees grouped by RE name and region
+    # Region to project RE column mapping
+    re_columns = {
+        'عسير': 're_asir',
+        'جازان': 're_jazan',
+        'الباحة': 're_baha',
+        'نجران': 're_najran',
+    }
+
+    # Load all active employees
     employees = db.session.query(Employee).join(
         EmployeeStatus, Employee.current_status_id == EmployeeStatus.id
     ).outerjoin(JobCode, Employee.job_code_id == JobCode.id).filter(
@@ -683,17 +691,22 @@ def org_chart_smart():
     # Organize by region and RE
     data_by_region = defaultdict(lambda: defaultdict(lambda: {'employees': [], 'projects': []}))
 
+    # Group employees by region and direct_manager (RE name)
     for emp in employees:
-        if emp.region and emp.responsible_engineer:
+        if emp.region and emp.direct_manager:
             region = emp.region
-            re_name = emp.responsible_engineer
+            re_name = emp.direct_manager
             data_by_region[region][re_name]['employees'].append(emp)
 
+    # Group projects by region and RE column
     for proj in projects:
-        if proj.region and proj.re_general:
+        if proj.region:
             region = proj.region
-            re_name = proj.re_general
-            data_by_region[region][re_name]['projects'].append(proj)
+            re_col = re_columns.get(region)
+            if re_col:
+                re_name = getattr(proj, re_col, None)
+                if re_name:
+                    data_by_region[region][re_name]['projects'].append(proj)
 
     # Calculate KPIs per region
     region_kpis = {}
@@ -701,7 +714,7 @@ def org_chart_smart():
         res = data_by_region[region]
         total_emp = sum(len(data['employees']) for data in res.values())
         total_proj = sum(len(data['projects']) for data in res.values())
-        total_con = len({proj.contractor_name for projs in res.values() for proj in projs['projects'] if proj.contractor_name})
+        total_con = len({proj.contractor_name for data in res.values() for proj in data['projects'] if proj.contractor_name})
         total_re = len(res)
         region_kpis[region] = {'emp': total_emp, 'proj': total_proj, 'con': total_con, 're': total_re}
 
