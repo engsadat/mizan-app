@@ -1,23 +1,41 @@
-# Mizan — current status (2026-08-27)
+# Mizan — current status (2026-08-29)
 
 Update this file at the end of every session. Then `git commit` + `git push`.
 Next chat: open `mizan-app` → read `CLAUDE.md` + this file → **one** task.
 Do not save status to a Claude memo.
 
-## Live (checked 2026-08-27)
+## Live (checked 2026-08-29)
 
 - URL: https://southmizan.pythonanywhere.com — **up**
-- Login page: Arabic ميزان / المنطقة الجنوبية, CSRF on, session cookie Secure + HttpOnly + SameSite=Lax
-- `/` `/employees/` `/reports/` `/settings/` `/reports/finance` → redirect to `/auth/login` (routes exist)
-- Login (admin user, password reset on PA): **succeeded** (2026-08-26)
-- Job codes page: Populated with codes and salaries via script (2026-08-26)
+- Login page: Arabic ميزان / المنطقة الجنوبية, 200 OK
+- CSRF: session cookie on `/auth/login` includes `csrf_token`; cookie flags Secure + HttpOnly + SameSite=Lax
+- These routes exist and redirect unauthenticated users to `/auth/login` (302):
+  `/` `/employees/` `/reports/` `/settings/` `/reports/finance`
+  `/reports/org-chart` `/reports/org-chart-smart` `/reports/project-map-smart`
+  `/reports/projects-dashboard`
+- Login test this session: **not checked**
+- Last successful login recorded: 2026-08-26 (admin user; do not treat as re-verified)
 
-## Code
+## Code (checked 2026-08-29)
 
-- Canonical: `engsadat/mizan-app` `master` @ `2a9f92e` (2026-08-26, org chart integration complete)
-- PythonAnywhere HEAD: `e90d900` (awaiting deployment of org chart feature)
-- GitHub master: `2a9f92e` (org chart merged: script, routes, templates, PDF export)
-- Local laptop: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` tracking `origin/master` only
+- Canonical: `engsadat/mizan-app` `master`
+- `git pull origin master`: already up to date
+- Local laptop = `origin/master` @ `279bf86` (2026-08-27, “Update STATUS: Session 7 complete — Smart Chart projects fixed”)
+- PythonAnywhere SHA: **not checked** (no pull/reload on the server this session)
+- Working tree: clean, tracking `origin/master` only
+
+## Leftovers still on disk (do not develop in these)
+
+Canonical clone is intact. These still exist and should be deleted next:
+
+- `C:\Users\engsa\OneDrive\Desktop\AI\hr_webapp`
+- `C:\Users\engsa\OneDrive\Desktop\AI\nwc-mizan-webapp`
+
+Claude-Projects PR #2 URL returned 404 this session — **not confirmed** open or closed.
+
+## One next task
+
+Delete the two leftover local folders above. Do not copy files from them into this repo.
 
 ## Product (this version)
 
