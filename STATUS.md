@@ -19,12 +19,11 @@ Do not save status to a Claude memo.
 ## Code (checked 2026-08-29)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local laptop = `origin/master` @ `315b136` (STATUS: SSH key missing)
-- PythonAnywhere HEAD: `5db9835` — `fix: Smart Project Map — add search functionality for RE filtering` (user pasted from PA Bash, 2026-08-29). PA `origin/master` was stale at the same SHA. **9 commits behind** GitHub, including Smart Chart project-name fixes (`01097a3`…`020836e`).
-- PA working tree was dirty (not pulled this session):
-  - modified: `09_OrgChart_Asir.html`, `org_chart_landing.html`, `Office-RE.xlsx`, `exception shorten names.txt`, `employees data source.xlsx`
-  - untracked: `app/blueprints/reports/routes.py.bak`, `app/org_charts/`
-  - staged/odd: `FETCH_HEAD` (do not commit)
+- Local laptop = `origin/master` @ `c1285d8`
+- PythonAnywhere HEAD: `c1285d8` — fast-forward `5db9835..c1285d8` succeeded (user pasted pull output, 2026-08-29). Matches GitHub `origin/master`.
+- Pull brought in Smart Chart template/route fixes plus STATUS. Web app **reload not confirmed**.
+- PA status after pull: `## master...origin/master` and untracked `?? app/blueprints/re` (paste truncated; likely `routes.py.bak`). Do not add it.
+- Stash restore of PA Excel files: **not visible** in the pasted status (no `M data/…`). If stash `pa-before-pull-2026-08-29` still exists, restore those three data files before dropping the stash.
 - Working tree on laptop: clean, tracking `origin/master` only
 
 ## Leftovers (checked 2026-08-29)
@@ -40,24 +39,13 @@ Claude-Projects PR #2 URL returned 404 earlier today — **not confirmed** open 
 
 ## One next task
 
-On PythonAnywhere Bash, stash local edits, pull `master`, restore only Excel/data, then reload the web app. Do not commit PA files. Do not `git add` `FETCH_HEAD`, `routes.py.bak`, or `app/org_charts/`.
+On PythonAnywhere: **Web tab → Reload** `southmizan.pythonanywhere.com` (needed for `routes.py` + `org_chart_smart.html`). Then reply “reloaded”.
+
+If `git stash list` still shows `pa-before-pull-2026-08-29`, restore Excel only (do not restore HTML/templates, do not commit):
 
 ```
 cd /home/southMizan/mizan-app
-git restore --staged FETCH_HEAD 2>/dev/null
-rm -f FETCH_HEAD
-
-git stash push -m "pa-before-pull-2026-08-29" -- \
-  "app/static/org_charts/09_OrgChart_Asir.html" \
-  "app/templates/reports/org_chart_landing.html" \
-  "data/Organize/Office-RE.xlsx" \
-  "data/Organize/exception shorten names.txt" \
-  "data/source/employees data source.xlsx"
-
-git pull origin master
-git log -1 --oneline
-git status -sb
-
+git stash list
 git checkout stash@{0} -- \
   "data/Organize/Office-RE.xlsx" \
   "data/Organize/exception shorten names.txt" \
@@ -68,7 +56,7 @@ git restore --staged \
   "data/source/employees data source.xlsx"
 ```
 
-Then Web tab → Reload. Paste `git log -1 --oneline` and `git status -sb` here. Expected HEAD: `315b136` or later.
+Do not `git add` untracked `routes.py.bak` or `app/org_charts/`.
 
 ## Product (this version)
 
