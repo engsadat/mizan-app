@@ -19,23 +19,24 @@ Do not save status to a Claude memo.
 ## Code (checked 2026-08-29)
 
 - Canonical: `engsadat/mizan-app` `master`
-- `git pull origin master`: already up to date
-- Local laptop = `origin/master` @ `279bf86` (2026-08-27, “Update STATUS: Session 7 complete — Smart Chart projects fixed”)
+- Local laptop = `origin/master` @ `b9bdb53` (2026-08-29 STATUS live check)
 - PythonAnywhere SHA: **not checked** (no pull/reload on the server this session)
 - Working tree: clean, tracking `origin/master` only
 
-## Leftovers still on disk (do not develop in these)
+## Leftovers (checked 2026-08-29)
 
-Canonical clone is intact. These still exist and should be deleted next:
+User deleted both folders. Verified gone this session:
 
-- `C:\Users\engsa\OneDrive\Desktop\AI\hr_webapp`
-- `C:\Users\engsa\OneDrive\Desktop\AI\nwc-mizan-webapp`
+- `C:\Users\engsa\OneDrive\Desktop\AI\hr_webapp` — gone
+- `C:\Users\engsa\OneDrive\Desktop\AI\nwc-mizan-webapp` — gone
 
-Claude-Projects PR #2 URL returned 404 this session — **not confirmed** open or closed.
+Canonical clone intact: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` → `engsadat/mizan-app`.
+
+Claude-Projects PR #2 URL returned 404 earlier today — **not confirmed** open or closed.
 
 ## One next task
 
-Delete the two leftover local folders above. Do not copy files from them into this repo.
+On PythonAnywhere, confirm `/home/southMizan/mizan-app` HEAD matches `origin/master` (`b9bdb53` or later). Pull + reload the web app only if it is behind. Do not invent the SHA.
 
 ## Product (this version)
 
