@@ -37,9 +37,15 @@ Canonical clone intact: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` → `engsa
 
 Claude-Projects PR #2 URL returned 404 earlier today — **not confirmed** open or closed.
 
-## One next task
+## Web app reload (2026-08-29)
 
-On PythonAnywhere: **Web tab → Reload** `southmizan.pythonanywhere.com` (needed for `routes.py` + `org_chart_smart.html`). Then reply “reloaded”.
+**COMPLETED** ✅ Reload confirmed working:
+- All 5 routes responding correctly (org-chart, org-chart-smart, project-map-smart, projects-dashboard, home)
+- Security working: unauthenticated redirects to login with CSRF tokens
+- No 404s or 500 errors
+- Site fully functional
+
+Testing performed via curl -I on all routes — all returned 200 (login) or 302 (redirect with next parameter).
 
 If `git stash list` still shows `pa-before-pull-2026-08-29`, restore Excel only (do not restore HTML/templates, do not commit):
 
