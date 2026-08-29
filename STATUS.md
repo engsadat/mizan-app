@@ -19,9 +19,13 @@ Do not save status to a Claude memo.
 ## Code (checked 2026-08-29)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local laptop = `origin/master` @ `63a8a42` (leftovers confirmed deleted)
-- PythonAnywhere SHA: **not checked** — SSH `southMizan@ssh.pythonanywhere.com` returned Permission denied (publickey,password). No PA API token in env. No `~/.ssh` key on this laptop. Did not pull or reload on the server.
-- Working tree: clean, tracking `origin/master` only
+- Local laptop = `origin/master` @ `315b136` (STATUS: SSH key missing)
+- PythonAnywhere HEAD: `5db9835` — `fix: Smart Project Map — add search functionality for RE filtering` (user pasted from PA Bash, 2026-08-29). PA `origin/master` was stale at the same SHA. **9 commits behind** GitHub, including Smart Chart project-name fixes (`01097a3`…`020836e`).
+- PA working tree was dirty (not pulled this session):
+  - modified: `09_OrgChart_Asir.html`, `org_chart_landing.html`, `Office-RE.xlsx`, `exception shorten names.txt`, `employees data source.xlsx`
+  - untracked: `app/blueprints/reports/routes.py.bak`, `app/org_charts/`
+  - staged/odd: `FETCH_HEAD` (do not commit)
+- Working tree on laptop: clean, tracking `origin/master` only
 
 ## Leftovers (checked 2026-08-29)
 
@@ -36,16 +40,35 @@ Claude-Projects PR #2 URL returned 404 earlier today — **not confirmed** open 
 
 ## One next task
 
-In a PythonAnywhere Bash console for `southMizan`, run:
+On PythonAnywhere Bash, stash local edits, pull `master`, restore only Excel/data, then reload the web app. Do not commit PA files. Do not `git add` `FETCH_HEAD`, `routes.py.bak`, or `app/org_charts/`.
 
 ```
 cd /home/southMizan/mizan-app
-git rev-parse HEAD
+git restore --staged FETCH_HEAD 2>/dev/null
+rm -f FETCH_HEAD
+
+git stash push -m "pa-before-pull-2026-08-29" -- \
+  "app/static/org_charts/09_OrgChart_Asir.html" \
+  "app/templates/reports/org_chart_landing.html" \
+  "data/Organize/Office-RE.xlsx" \
+  "data/Organize/exception shorten names.txt" \
+  "data/source/employees data source.xlsx"
+
+git pull origin master
 git log -1 --oneline
 git status -sb
+
+git checkout stash@{0} -- \
+  "data/Organize/Office-RE.xlsx" \
+  "data/Organize/exception shorten names.txt" \
+  "data/source/employees data source.xlsx"
+git restore --staged \
+  "data/Organize/Office-RE.xlsx" \
+  "data/Organize/exception shorten names.txt" \
+  "data/source/employees data source.xlsx"
 ```
 
-Paste the output here. If HEAD is behind `63a8a42`, then `git pull origin master` and reload the web app. Do not invent the SHA.
+Then Web tab → Reload. Paste `git log -1 --oneline` and `git status -sb` here. Expected HEAD: `315b136` or later.
 
 ## Product (this version)
 
