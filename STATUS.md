@@ -19,8 +19,8 @@ Do not save status to a Claude memo.
 ## Code (checked 2026-08-29)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local laptop = `origin/master` @ `b9bdb53` (2026-08-29 STATUS live check)
-- PythonAnywhere SHA: **not checked** (no pull/reload on the server this session)
+- Local laptop = `origin/master` @ `63a8a42` (leftovers confirmed deleted)
+- PythonAnywhere SHA: **not checked** — SSH `southMizan@ssh.pythonanywhere.com` returned Permission denied (publickey,password). No PA API token in env. No `~/.ssh` key on this laptop. Did not pull or reload on the server.
 - Working tree: clean, tracking `origin/master` only
 
 ## Leftovers (checked 2026-08-29)
@@ -36,7 +36,16 @@ Claude-Projects PR #2 URL returned 404 earlier today — **not confirmed** open 
 
 ## One next task
 
-On PythonAnywhere, confirm `/home/southMizan/mizan-app` HEAD matches `origin/master` (`b9bdb53` or later). Pull + reload the web app only if it is behind. Do not invent the SHA.
+In a PythonAnywhere Bash console for `southMizan`, run:
+
+```
+cd /home/southMizan/mizan-app
+git rev-parse HEAD
+git log -1 --oneline
+git status -sb
+```
+
+Paste the output here. If HEAD is behind `63a8a42`, then `git pull origin master` and reload the web app. Do not invent the SHA.
 
 ## Product (this version)
 
