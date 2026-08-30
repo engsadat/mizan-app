@@ -1,9 +1,14 @@
-from flask import render_template, request, redirect, url_for, flash, abort
+from flask import render_template, request, redirect, url_for, flash, abort, send_file
 from flask_login import login_required, current_user
 from app.blueprints.employees import emp_bp
 from app.models import Employee, EmployeeStatus, JobCode, Nationality, Office, AttendanceGroup, EmployeeStatusHistory
 from app import db
 from datetime import date
+from utils.employee_cache import EmployeeCache, Pagination
+from utils.excel_reader import save_excel
+from openpyxl import Workbook
+from io import BytesIO
+import os
 
 REGIONS          = ['عسير', 'جازان', 'الباحة', 'نجران']
 STATUS_ON_STRENGTH = 'على قوة العمل'
@@ -18,26 +23,25 @@ def list_employees():
     status_filter = request.args.get('status', 'active')
     page          = request.args.get('page', 1, type=int)
 
-    q = Employee.query.join(Employee.current_status)
+    # Load employees from Excel
+    filtered = EmployeeCache.search(query=search, region=region, status=status_filter if status_filter != 'active' else '')
 
+    # For 'active' status filter, include both 'على قوة العمل' and 'بديل'
     if status_filter == 'active':
-        q = q.filter(EmployeeStatus.name_ar.in_(ACTIVE_STATUSES))
-    elif status_filter != 'all':
-        q = q.filter(EmployeeStatus.name_ar == status_filter)
+        filtered = [e for e in filtered if e.get('status') in (STATUS_ON_STRENGTH, STATUS_REPLACEMENT)]
 
-    if region and region in REGIONS:
-        q = q.filter(Employee.region == region)
-    if search:
-        q = q.filter(Employee.full_name.contains(search))
+    # Create pagination
+    pagination = Pagination(filtered, page=page, per_page=50)
+    pagination.items = pagination.get_page_items()
 
-    pagination   = q.order_by(Employee.region, Employee.full_name).paginate(page=page, per_page=50)
-    active_count = Employee.query.join(Employee.current_status).filter(
-        EmployeeStatus.name_ar == STATUS_ON_STRENGTH
-    ).count()
-    replacement_count = Employee.query.join(Employee.current_status).filter(
-        EmployeeStatus.name_ar == STATUS_REPLACEMENT
-    ).count()
-    all_statuses = EmployeeStatus.query.order_by(EmployeeStatus.name_ar).all()
+    # Count by status
+    all_employees = EmployeeCache.get_all()
+    active_count = sum(1 for e in all_employees if e.get('status') == STATUS_ON_STRENGTH)
+    replacement_count = sum(1 for e in all_employees if e.get('status') == STATUS_REPLACEMENT)
+
+    # Get unique statuses from data
+    all_statuses_set = set(e.get('status') for e in all_employees if e.get('status'))
+    all_statuses = [{'name_ar': s} for s in sorted(all_statuses_set)]
 
     return render_template('employees/list.html',
                            pagination=pagination,
@@ -52,15 +56,70 @@ def list_employees():
 @emp_bp.route('/<int:emp_id>/panel')
 @login_required
 def side_panel(emp_id):
-    emp = Employee.query.get_or_404(emp_id)
+    emp = EmployeeCache.get_by_id(emp_id)
+    if not emp:
+        abort(404)
     return render_template('employees/_panel.html', emp=emp)
 
 @emp_bp.route('/<int:emp_id>')
 @login_required
 def profile(emp_id):
-    emp      = Employee.query.get_or_404(emp_id)
-    statuses = EmployeeStatus.query.all()
+    emp = EmployeeCache.get_by_id(emp_id)
+    if not emp:
+        abort(404)
+    all_statuses_set = set(e.get('status') for e in EmployeeCache.get_all() if e.get('status'))
+    statuses = [{'name_ar': s} for s in sorted(all_statuses_set)]
     return render_template('employees/profile.html', emp=emp, statuses=statuses, today=date.today().isoformat())
+
+@emp_bp.route('/export')
+@login_required
+def export_employees():
+    """Export filtered employees to Excel."""
+    region        = request.args.get('region', '')
+    search        = request.args.get('q', '').strip()
+    status_filter = request.args.get('status', 'active')
+
+    # Get filtered employees
+    filtered = EmployeeCache.search(query=search, region=region, status=status_filter if status_filter != 'active' else '')
+
+    if status_filter == 'active':
+        filtered = [e for e in filtered if e.get('status') in (STATUS_ON_STRENGTH, STATUS_REPLACEMENT)]
+
+    # Create Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'الموظفون'
+
+    # Add headers
+    headers = ['الرقم', 'الاسم', 'الوظيفة', 'المنطقة', 'الهاتف', 'الراتب', 'الجنسية', 'الكفالة', 'الفئة', 'الموقف']
+    ws.append(headers)
+
+    # Add data
+    for idx, emp in enumerate(filtered, 1):
+        ws.append([
+            idx,
+            emp.get('name', ''),
+            emp.get('job', ''),
+            emp.get('region', ''),
+            emp.get('phone', ''),
+            emp.get('salary', ''),
+            emp.get('nation', ''),
+            emp.get('kafala', ''),
+            emp.get('category', ''),
+            emp.get('status', ''),
+        ])
+
+    # Save to BytesIO and send
+    stream = BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+
+    return send_file(
+        stream,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=f'employees_export.xlsx'
+    )
 
 @emp_bp.route('/add', methods=['GET', 'POST'])
 @login_required
