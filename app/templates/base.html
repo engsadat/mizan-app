@@ -373,7 +373,8 @@
 
     <footer>
         <p>&copy; 2026 ميزان - نظام إدارة الموارد البشرية | المنطقة الجنوبية</p>
-        <p>آخر تحديث: {{ now.strftime('%d/%m/%Y') }}</p>
+        <p>آخر تحديث: {{ now.strftime('%d/%m/%Y %H:%M') }} | البيانات من: 2026-08-30 13:35:24</p>
+        <p style="font-size: 0.85rem; color: #999;">Phase 1: Read-only. Write operations (employees/job-codes/users) are Phase 2.</p>
     </footer>
 
     {% block extra_js %}{% endblock %}

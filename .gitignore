@@ -16,5 +16,9 @@ venv/
 # Temp Excel copies created by load_copy()
 *.tmp.xlsx
 
+# Excel data files (should not be tracked in git)
+# Override with EXCEL_SOURCES environment variables in production
+data/**/*.xlsx
+
 # Git worktrees
 .worktrees/

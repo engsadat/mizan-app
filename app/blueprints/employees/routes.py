@@ -10,7 +10,7 @@ from openpyxl import Workbook
 from io import BytesIO
 import os
 
-REGIONS          = ['عسير', 'جازان', 'الباحة', 'نجران']
+REGIONS          = ['نجران', 'الباحة', 'جازان', 'عسير']
 STATUS_ON_STRENGTH = 'على قوة العمل'
 STATUS_REPLACEMENT = 'بديل'
 ACTIVE_STATUSES  = {STATUS_ON_STRENGTH, STATUS_REPLACEMENT}
@@ -124,6 +124,7 @@ def export_employees():
 @emp_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_employee():
+    # PHASE 2: Add employee write operations (currently read-only in Phase 1)
     if current_user.role == 'viewer':
         abort(403)
     statuses      = EmployeeStatus.query.all()
@@ -172,6 +173,7 @@ def add_employee():
 @emp_bp.route('/<int:emp_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_employee(emp_id):
+    # PHASE 2: Edit employee write operations (currently read-only in Phase 1)
     if current_user.role == 'viewer':
         abort(403)
     emp           = Employee.query.get_or_404(emp_id)
@@ -242,6 +244,7 @@ def edit_employee(emp_id):
 @emp_bp.route('/<int:emp_id>/status', methods=['POST'])
 @login_required
 def change_status(emp_id):
+    # PHASE 2: Change employee status write operation (currently read-only in Phase 1)
     if current_user.role == 'viewer':
         abort(403)
     emp           = Employee.query.get_or_404(emp_id)

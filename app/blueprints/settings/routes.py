@@ -41,6 +41,7 @@ def job_codes():
 @settings_bp.route('/job-codes/add', methods=['POST'])
 @login_required
 def add_job_code():
+    # PHASE 2: Add job code write operation (currently read-only in Phase 1)
     _admin_only()
     title = request.form.get('title', '').strip()
     if not title:
@@ -59,6 +60,7 @@ def add_job_code():
 @settings_bp.route('/job-codes/<int:jc_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_job_code(jc_id):
+    # PHASE 2: Edit job code write operation (currently read-only in Phase 1)
     _admin_only()
     jc = JobCode.query.get_or_404(jc_id)
     if request.method == 'POST':
@@ -85,6 +87,7 @@ def users():
 @settings_bp.route('/users/add', methods=['POST'])
 @login_required
 def add_user():
+    # PHASE 2: Add user write operation (currently read-only in Phase 1)
     _admin_only()
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
@@ -127,6 +130,7 @@ def add_user():
 @settings_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_user(user_id):
+    # PHASE 2: Edit user write operation (currently read-only in Phase 1)
     _admin_only()
     user = User.query.get_or_404(user_id)
 
@@ -159,6 +163,7 @@ def edit_user(user_id):
 @settings_bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user(user_id):
+    # PHASE 2: Delete user write operation (currently read-only in Phase 1)
     _admin_only()
     user = User.query.get_or_404(user_id)
 

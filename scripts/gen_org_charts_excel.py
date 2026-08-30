@@ -17,7 +17,7 @@ from load_employees import load_employees
 from load_projects import load_projects
 
 
-REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
+REGIONS = ['نجران', 'الباحة', 'جازان', 'عسير']
 REGION_FILES = {
     'عسير': '09_OrgChart_Asir.html',
     'جازان': '10_OrgChart_Jizan.html',

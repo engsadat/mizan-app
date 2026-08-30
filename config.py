@@ -33,8 +33,8 @@ class Config:
         'مهندس موقع': {'code': 'SITE-ENG', 'rate': 5500},
     }
 
-    # Region constants
-    REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
+    # Region constants (Phase 1 audit: reversed order per user requirements)
+    REGIONS = ['نجران', 'الباحة', 'جازان', 'عسير']
     REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
     REPORT_MONTH = "يونيو 2026"
     PROJECT_MGR = "م/ يسري أحمد عبد السلام"

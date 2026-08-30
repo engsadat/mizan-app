@@ -8,7 +8,7 @@ from app.blueprints.reports import reports_bp
 from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office, Project
 from app import db
 
-REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
+REGIONS = ['نجران', 'الباحة', 'جازان', 'عسير']
 REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
 ONGOING_STATE = 'تحت التنفيذ'
 
