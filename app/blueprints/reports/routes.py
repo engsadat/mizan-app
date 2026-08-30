@@ -264,14 +264,24 @@ def _msar(v):
 
 
 def _project_pivot_data():
-    """Included=Yes. KPIs + charts = تحت التنفيذ by region. Tables = all statuses."""
-    projects = Project.query.filter_by(included=True).all()
+    """Load projects from Excel. KPIs + charts = تحت التنفيذ by region. Tables = all statuses."""
+    from scripts.load_projects import load_projects
+
+    # Load all active projects from Excel
+    projects = load_projects()
 
     def region_of(p):
-        return (p.region or '').strip() or 'غير محدد'
+        return (p.get('region') or '').strip() or 'غير محدد'
 
     def state_of(p):
-        return (p.project_state or '').strip() or 'غير محدد'
+        return (p.get('state') or '').strip() or 'غير محدد'
+
+    def value_of(p):
+        try:
+            v = p.get('value', '')
+            return float(v) if v else 0.0
+        except (ValueError, TypeError):
+            return 0.0
 
     extra = []
     for p in projects:
@@ -284,11 +294,12 @@ def _project_pivot_data():
     pivot = {}
     for p in projects:
         st, rg = state_of(p), region_of(p)
-        status_value[st] = status_value.get(st, 0) + (p.value or 0)
+        val = value_of(p)
+        status_value[st] = status_value.get(st, 0) + val
         pivot.setdefault(st, {})
         cell = pivot[st].setdefault(rg, {'count': 0, 'value': 0.0})
         cell['count'] += 1
-        cell['value'] += p.value or 0
+        cell['value'] += val
 
     statuses = sorted(status_value, key=lambda s: -status_value[s])
     for st in statuses:
@@ -318,7 +329,7 @@ def _project_pivot_data():
     ongoing_kpis.append({
         'region': 'الإجمالي',
         'count': len(ongoing),
-        'msar': _msar(sum(p.value or 0 for p in ongoing)),
+        'msar': _msar(sum(value_of(p) for p in ongoing)),
         'is_total': True,
     })
 
@@ -328,7 +339,7 @@ def _project_pivot_data():
         ongoing_kpis.append({
             'region': rg,
             'count': len(rows),
-            'msar': _msar(sum(p.value or 0 for p in rows)),
+            'msar': _msar(sum(value_of(p) for p in rows)),
             'is_total': False,
         })
 
@@ -341,10 +352,10 @@ def _project_pivot_data():
         'count_row_totals': count_row_totals,
         'msar_row_totals': msar_row_totals,
         'total_projects': len(projects),
-        'total_msar': _msar(sum(p.value or 0 for p in projects)),
+        'total_msar': _msar(sum(value_of(p) for p in projects)),
         'ongoing_kpis': ongoing_kpis,
         'ongoing_count': len(ongoing),
-        'ongoing_msar': _msar(sum(p.value or 0 for p in ongoing)),
+        'ongoing_msar': _msar(sum(value_of(p) for p in ongoing)),
         'value_chart': [{'name': k['region'], 'value': k['msar']} for k in ongoing_kpis],
         'count_chart': [{'name': k['region'], 'count': k['count']} for k in ongoing_kpis],
     }
