@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+"""Generate organizational chart HTML files for each region from Excel data.
+
+Reads employee and project data from Excel files.
+Outputs: app/static/org_charts/09_OrgChart_*.html for each region.
+
+Run from mizan-app root: python scripts/gen_org_charts_excel.py
+"""
+import sys
+from pathlib import Path
+from collections import defaultdict
+
+# Add parent to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from load_employees import load_employees
+from load_projects import load_projects
+
+
+REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
+REGION_FILES = {
+    'عسير': '09_OrgChart_Asir.html',
+    'جازان': '10_OrgChart_Jizan.html',
+    'الباحة': '11_OrgChart_Baha.html',
+    'نجران': '12_OrgChart_Najran.html',
+}
+
+OUTPUT_DIR = Path(__file__).parent.parent / 'app' / 'static' / 'org_charts'
+
+
+def generate_region_chart(region, employees, projects):
+    """Generate HTML org chart for a single region."""
+    # Filter employees by region
+    region_emps = [e for e in employees if e.get('region') == region]
+    region_projects = [p for p in projects if p.get('region') == region]
+
+    print(f"  {region}: {len(region_emps)} employees, {len(region_projects)} projects")
+
+    # Group employees by job category
+    by_category = defaultdict(list)
+    for emp in region_emps:
+        cat = emp.get('category', 'أخرى')
+        by_category[cat].append(emp)
+
+    # Build HTML
+    html = f'''<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الهيكل التنظيمي - {region}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{ font-family: 'Cairo', sans-serif; background: #f5f5f5; color: #333; direction: rtl; }}
+    .header {{ background: linear-gradient(to bottom, #0a1f3d, #0071b9); color: white; padding: 20px; text-align: center; }}
+    .header h1 {{ font-size: 28px; margin-bottom: 10px; }}
+    .header p {{ font-size: 14px; opacity: 0.9; }}
+    .container {{ max-width: 1400px; margin: 20px auto; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+    .kpi-row {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }}
+    .kpi {{ background: #f9f9f9; border-right: 4px solid #0071b9; padding: 15px; border-radius: 4px; text-align: center; }}
+    .kpi-value {{ font-size: 24px; font-weight: bold; color: #0a1f3d; }}
+    .kpi-label {{ font-size: 12px; color: #666; margin-top: 5px; }}
+    .section-title {{ font-size: 18px; font-weight: bold; color: #0a1f3d; border-bottom: 2px solid #0071b9; padding-bottom: 10px; margin: 30px 0 20px 0; }}
+    .emp-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }}
+    .emp-card {{ background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; padding: 15px; }}
+    .emp-name {{ font-weight: bold; color: #0a1f3d; font-size: 14px; margin-bottom: 8px; }}
+    .emp-detail {{ font-size: 12px; color: #666; margin: 3px 0; }}
+    .emp-region {{ color: #0071b9; font-weight: 600; }}
+    .print-footer {{ text-align: center; font-size: 12px; color: #999; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }}
+    @media print {{ body {{ background: white; }} .container {{ box-shadow: none; }} }}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>الهيكل التنظيمي - {region}</h1>
+    <p>المنطقة الجنوبية - NWC</p>
+  </div>
+
+  <div class="container">
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-value">{len(region_emps)}</div>
+        <div class="kpi-label">الموظفون</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-value">{len(region_projects)}</div>
+        <div class="kpi-label">المشاريع</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-value">{len(by_category)}</div>
+        <div class="kpi-label">الفئات</div>
+      </div>
+    </div>
+
+    <!-- Employees by Category -->
+'''
+
+    for category in sorted(by_category.keys()):
+        emps = sorted(by_category[category], key=lambda e: e.get('name', ''))
+        html += f'    <div class="section-title">{category} ({len(emps)})</div>\n'
+        html += '    <div class="emp-grid">\n'
+
+        for emp in emps:
+            name = emp.get('name', 'غير معروف')
+            job = emp.get('job', '')
+            phone = emp.get('phone', '')
+            salary = emp.get('salary', '')
+            html += f'''      <div class="emp-card">
+        <div class="emp-name">{name}</div>
+        <div class="emp-detail"><strong>{job}</strong></div>
+        <div class="emp-detail">☎ {phone}</div>
+        <div class="emp-detail emp-region">💰 {salary}</div>
+      </div>
+'''
+
+        html += '    </div>\n'
+
+    html += '''
+    <div class="print-footer">
+      <p>تم إنشاء هذا التقرير من قاعدة البيانات الحالية</p>
+    </div>
+  </div>
+</body>
+</html>
+'''
+
+    return html
+
+
+def main():
+    """Generate org charts for all regions."""
+    print("[INFO] Loading employees and projects from Excel...")
+
+    employees = load_employees()
+    projects = load_projects(state_filter='تحت التنفيذ')  # Only ongoing projects
+
+    print(f"[OK] Loaded {len(employees)} employees, {len(projects)} projects\n")
+
+    # Create output directory
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Generate charts for each region
+    for region in REGIONS:
+        print(f"Generating {region}...")
+        html = generate_region_chart(region, employees, projects)
+
+        # Save to file
+        output_file = OUTPUT_DIR / REGION_FILES[region]
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html)
+
+        print(f"  [OK] Saved to {output_file.name}")
+
+    print(f"\n[OK] All charts generated in {OUTPUT_DIR}")
+
+
+if __name__ == '__main__':
+    main()

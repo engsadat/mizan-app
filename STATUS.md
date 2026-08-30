@@ -14,9 +14,10 @@ Do not save status to a Claude memo.
 ## Code (checked 2026-08-30)
 
 - Canonical: `engsadat/mizan-app` `master`
-- `origin/master` SHA: `a438eb5` (laptop was 1 commit ahead of origin before this session save)
+- `origin/master` before merge: `2af06e4` (8 Phase-1 ticket commits landed on GitHub while this laptop was working)
+- Merged those tickets with this session’s Excel-first + org-smart fixes (`excel_data.py` remains the live employee/project reader)
 - PythonAnywhere HEAD: **not checked**
-- Local tests this session: `pytest tests -q` → **39 passed, 3 skipped**
+- Local tests this session: `pytest tests -q` → re-run after merge before treating as green
 
 ## Leftovers (checked 2026-08-30)
 
@@ -50,6 +51,6 @@ Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.p
 
 ## Next (one task)
 
-Make **print** org charts (`/reports/org-chart/<region>`) generate from Excel on each request (same data as smart chart), so they cannot go stale or get overwritten by `test_org_charts.py`.
+Wire print org charts to Excel for real: `scripts/gen_org_charts_excel.py` is now on master from the Phase 1 tickets — run it (or generate on request) so `/reports/org-chart/<region>` matches the live smart chart, then delete/ignore `scripts/test_org_charts.py`.
 
 Do not deploy to PythonAnywhere until the user asks after reviewing locally.

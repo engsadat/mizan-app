@@ -22,7 +22,23 @@ class Config:
         'employees': os.environ.get('EXCEL_EMPLOYEES') or str(DATA_FOLDER / 'source' / 'employees data source.xlsx'),
         'projects': os.environ.get('EXCEL_PROJECTS') or str(DATA_FOLDER / 'source' / 'project_2026_database_ver1_updated.xlsx'),
         'office_re': os.environ.get('EXCEL_OFFICE_RE') or str(DATA_FOLDER / 'Organize' / 'Office-RE.xlsx'),
+        'contacts': os.environ.get('EXCEL_CONTACTS') or str(DATA_FOLDER / 'source' / 'contacts.xlsx'),
     }
+
+    # Job code constants (Phase 1: hardcoded; Phase 2: load from Excel)
+    JOB_CODES = {
+        'مهندس أمن وسلامة': {'code': 'HSE-ENG', 'rate': 5000},
+        'مراقب أمن وسلامة': {'code': 'HSE-SUP', 'rate': 3500},
+        'مراقب موقع': {'code': 'SITE-SUP', 'rate': 3000},
+        'مهندس مقيم': {'code': 'RES-ENG', 'rate': 6000},
+        'مهندس موقع': {'code': 'SITE-ENG', 'rate': 5500},
+    }
+
+    # Region constants
+    REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
+    REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
+    REPORT_MONTH = "يونيو 2026"
+    PROJECT_MGR = "م/ يسري أحمد عبد السلام"
 
 
 class DevelopmentConfig(Config):
