@@ -30,42 +30,41 @@ def _b64_logo(rel_path):
 
 
 def _chart_data():
-    rows = (
-        db.session.query(Employee.region, Employee.category, JobCode.title)
-        .join(EmployeeStatus, Employee.current_status_id == EmployeeStatus.id)
-        .outerjoin(JobCode, Employee.job_code_id == JobCode.id)
-        .filter(EmployeeStatus.name_ar == 'على قوة العمل')
-        .all()
-    )
+    # Phase 1: Load from Excel via EmployeeCache
+    from utils.employee_cache import EmployeeCache
+
+    employees = EmployeeCache.get_all()
+    # Filter to على قوة العمل only
+    rows = [e for e in employees if e.get('status') == 'على قوة العمل']
 
     def cnt(fn):
-        return [sum(1 for r in rows if r.region == reg and fn(r)) for reg in REGIONS]
+        return [sum(1 for r in rows if (r.get('region') or '').strip() == reg and fn(r)) for reg in REGIONS]
 
     def has(kws):
-        return lambda r: any(k in (r.title or '') for k in kws)
+        return lambda r: any(k in (r.get('job') or '') for k in kws)
 
     def is_job(kw):
-        return lambda r: kw in (r.title or '')
+        return lambda r: kw in (r.get('job') or '')
 
     charts = [
         ('c1',  'إجمالي عناصر المشروع', 'h-special', cnt(lambda r: True)),
-        ('c2',  'عناصر الإشراف',         'h-special', cnt(lambda r: (r.category or '') == 'إشراف')),
-        ('c3',  'عناصر الدعم الفني',     'h-special', cnt(lambda r: (r.category or '') == 'دعم فني')),
+        ('c2',  'عناصر الإشراف',         'h-special', cnt(lambda r: (r.get('category') or '') == 'إشراف')),
+        ('c3',  'عناصر الدعم الفني',     'h-special', cnt(lambda r: (r.get('category') or '') == 'دعم فني')),
         ('c4',  'مهندس مقيم',            'h-navy',    cnt(is_job('مهندس مقيم'))),
         ('c5',  'مهندس موقع',            'h-navy',    cnt(is_job('مهندس موقع'))),
         ('c6',  'مهندس ميكانيكا',         'h-navy',    cnt(has(['ميكانيك']))),
         ('c7',  'مهندس كهرباء وتحكم',    'h-navy',    cnt(has(['كهرباء', 'تحكم']))),
-        ('c8',  'مهندس أمن وسلامة',      'h-navy',    cnt(lambda r: 'مهندس' in (r.title or '') and ('أمن' in (r.title or '') or 'سلامة' in (r.title or '')))),
+        ('c8',  'مهندس أمن وسلامة',      'h-navy',    cnt(lambda r: 'مهندس' in (r.get('job') or '') and ('أمن' in (r.get('job') or '') or 'سلامة' in (r.get('job') or '')))),
         ('c9',  'مهندس تخطيط',           'h-navy',    cnt(has(['تخطيط']))),
-        ('c10', 'مهندس مواد وجودة',      'h-navy',    cnt(lambda r: 'مواد' in (r.title or '') or ('جودة' in (r.title or '') and 'مهندس' in (r.title or '')))),
+        ('c10', 'مهندس مواد وجودة',      'h-navy',    cnt(lambda r: 'مواد' in (r.get('job') or '') or ('جودة' in (r.get('job') or '') and 'مهندس' in (r.get('job') or '')))),
         ('c11', 'حاسب كميات',            'h-navy',    cnt(has(['كميات']))),
-        ('c12', 'مراقب موقع',            'h-navy',    cnt(lambda r: 'مراقب موقع' in (r.title or ''))),
+        ('c12', 'مراقب موقع',            'h-navy',    cnt(lambda r: 'مراقب موقع' in (r.get('job') or ''))),
         ('c13', 'مساح',                  'h-navy',    cnt(has(['مساح']))),
-        ('c14', 'مراقب أمن وسلامة',      'h-navy',    cnt(lambda r: 'مراقب' in (r.title or '') and ('أمن' in (r.title or '') or 'سلامة' in (r.title or '')))),
+        ('c14', 'مراقب أمن وسلامة',      'h-navy',    cnt(lambda r: 'مراقب' in (r.get('job') or '') and ('أمن' in (r.get('job') or '') or 'سلامة' in (r.get('job') or '')))),
         ('c15', 'إخصائي وثائق',          'h-navy',    cnt(has(['وثائق']))),
     ]
 
-    region_totals = {reg: sum(1 for r in rows if r.region == reg) for reg in REGIONS}
+    region_totals = {reg: sum(1 for r in rows if (r.get('region') or '').strip() == reg) for reg in REGIONS}
     total = len(rows)
     return charts, region_totals, total
 
@@ -163,35 +162,38 @@ def filter_report():
 @reports_bp.route('/emp-kpi')
 @login_required
 def emp_kpi():
-    region = request.args.get('region', '')
+    # Phase 1: Load from Excel via EmployeeCache
+    from utils.employee_cache import EmployeeCache
 
-    base_q = Employee.query.join(Employee.current_status).filter(
-        EmployeeStatus.name_ar == 'على قوة العمل'
-    )
+    region = request.args.get('region', '')
+    all_employees = EmployeeCache.get_all()
+
+    # Filter to على قوة العمل
+    employees = [e for e in all_employees if e.get('status') == 'على قوة العمل']
     if region and region in REGIONS:
-        base_q = base_q.filter(Employee.region == region)
-    employees = base_q.all()
+        employees = [e for e in employees if e.get('region') == region]
 
     total_active = len(employees)
-    saudi_count  = sum(1 for e in employees if e.nationality and e.nationality.name_ar == 'سعودي')
+    saudi_count  = sum(1 for e in employees if e.get('nation') == 'سعودي')
     non_saudi    = total_active - saudi_count
 
-    repl_q = Employee.query.join(Employee.current_status).filter(EmployeeStatus.name_ar == 'بديل')
+    # Replacement count
+    replacement_emps = [e for e in all_employees if e.get('status') == 'بديل']
     if region and region in REGIONS:
-        repl_q = repl_q.filter(Employee.region == region)
-    replacement_count = repl_q.count()
+        replacement_emps = [e for e in replacement_emps if e.get('region') == region]
+    replacement_count = len(replacement_emps)
 
     # Region bars
-    region_counts = Counter(e.region for e in employees if e.region)
+    region_counts = Counter(e.get('region') for e in employees if e.get('region'))
     region_data   = [{'name': r, 'count': region_counts.get(r, 0)} for r in REGIONS]
 
     # Kafala bars
-    kafala_counts = Counter(e.kafala for e in employees if e.kafala)
+    kafala_counts = Counter(e.get('kafala') for e in employees if e.get('kafala'))
     kafala_data   = [{'name': k, 'count': v}
                      for k, v in sorted(kafala_counts.items(), key=lambda x: -x[1])]
 
     # Nationality top bars
-    nat_counts = Counter(e.nationality.name_ar for e in employees if e.nationality)
+    nat_counts = Counter(e.get('nation') for e in employees if e.get('nation'))
     top_nats   = nat_counts.most_common(8)
     top_keys   = {n for n, _ in top_nats}
     other      = sum(v for k, v in nat_counts.items() if k not in top_keys)
@@ -199,17 +201,17 @@ def emp_kpi():
     if other:
         nat_data.append({'name': 'أخرى', 'count': other})
 
-    # E2 / E3 table
+    # E2 / E3 table (from job title)
     job_e = {}
     for emp in employees:
-        if not emp.job_code:
+        job_title = emp.get('job', '')
+        if not job_title:
             continue
-        title = emp.job_code.title
-        m = re.search(r'\b(E[23])\b', title)
+        m = re.search(r'\b(E[23])\b', job_title)
         if not m:
             continue
         level = m.group(1)
-        base  = title[:title.rfind(level)].strip()
+        base  = job_title[:job_title.rfind(level)].strip()
         job_e.setdefault(base, {'E2': 0, 'E3': 0})
         job_e[base][level] += 1
 
