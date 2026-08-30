@@ -98,12 +98,12 @@
               hx-swap="innerHTML">
             <td>{{ loop.index + (pagination.page - 1) * 50 }}</td>
             <td>
-              {{ emp.full_name }}
-              {% if emp.is_replacement %}<span class="badge-replacement me-1">بديل</span>{% endif %}
+              {{ emp.name }}
+              {% if emp.status == 'بديل' %}<span class="badge-replacement me-1">بديل</span>{% endif %}
             </td>
-            <td>{{ emp.job_code.title if emp.job_code else '—' }}</td>
+            <td>{{ emp.job or '—' }}</td>
             <td>{{ emp.region or '—' }}</td>
-            <td>{{ emp.current_status.name_ar if emp.current_status else '—' }}</td>
+            <td>{{ emp.status or '—' }}</td>
           </tr>
           {% else %}
           <tr><td colspan="5" class="text-center text-muted">لا توجد نتائج</td></tr>
