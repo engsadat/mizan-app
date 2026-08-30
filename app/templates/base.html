@@ -345,8 +345,8 @@
             <nav>
                 <a href="{{ url_for('main.index') }}">الرئيسية</a>
                 <a href="{{ url_for('emp_bp.list_employees') }}">الموظفون</a>
-                <a href="{{ url_for('reports_bp.reports_home') }}">التقارير</a>
-                <a href="{{ url_for('settings_bp.settings_home') }}">الإعدادات</a>
+                <a href="{{ url_for('reports_bp.index') }}">التقارير</a>
+                <a href="{{ url_for('settings_bp.index') }}">الإعدادات</a>
             </nav>
             <div class="user-menu">
                 {% if current_user.is_authenticated %}
