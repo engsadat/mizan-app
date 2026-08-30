@@ -94,13 +94,37 @@ REPORT_COLUMNS = [
 @reports_bp.route('/filter-report', methods=['GET', 'POST'])
 @login_required
 def filter_report():
-    job_codes    = JobCode.query.order_by(JobCode.title).all()
-    att_groups   = AttendanceGroup.query.order_by(AttendanceGroup.name).all()
-    all_statuses = EmployeeStatus.query.order_by(EmployeeStatus.name_ar).all()
-    kafala_opts  = sorted(set(
-        r[0] for r in db.session.query(Employee.kafala).filter(Employee.kafala.isnot(None), Employee.kafala != '').all()
-    ))
-    offices      = Office.query.order_by(Office.name).all()
+    # Phase 1: Load from Excel via EmployeeCache
+    from utils.employee_cache import EmployeeCache
+    from flask import current_app
+
+    # Create mock objects for template compatibility
+    class MockJobCode:
+        def __init__(self, title, id_val):
+            self.title = title
+            self.id = id_val
+
+    # Job codes from config
+    job_codes = [MockJobCode(title, idx) for idx, title in enumerate(current_app.config.get('JOB_CODES', {}).keys())]
+
+    # Statuses from Excel data
+    all_employees = EmployeeCache.get_all()
+    statuses_set = set(e.get('status') for e in all_employees if e.get('status'))
+
+    class MockStatus:
+        def __init__(self, name_ar, id_val):
+            self.name_ar = name_ar
+            self.id = id_val
+
+    all_statuses = [MockStatus(s, idx) for idx, s in enumerate(sorted(statuses_set))]
+
+    # Kafala options from data
+    kafala_set = set(e.get('kafala') for e in all_employees if e.get('kafala'))
+    kafala_opts = sorted(kafala_set)
+
+    # Dummy objects for compatibility
+    att_groups = []
+    offices = []
 
     employees       = []
     filters_applied = False
@@ -121,27 +145,29 @@ def filter_report():
         }
         selected_cols = request.form.getlist('cols') or selected_cols
 
-        q = Employee.query.outerjoin(Employee.current_status)
-        if f['regions']:
-            q = q.filter(Employee.region.in_(f['regions']))
-        if f['nat_group'] == 'سعودي':
-            q = q.join(Employee.nationality).filter(Nationality.name_ar == 'سعودي')
-        elif f['nat_group'] == 'غير سعودي':
-            q = q.join(Employee.nationality).filter(Nationality.name_ar != 'سعودي')
-        if f['supervision']:
-            q = q.filter(Employee.supervision_type == f['supervision'])
-        if f['status_ids']:
-            q = q.filter(Employee.current_status_id.in_([int(x) for x in f['status_ids']]))
-        if f['job_code_ids']:
-            q = q.filter(Employee.job_code_id.in_([int(x) for x in f['job_code_ids']]))
-        if f['att_group_id']:
-            q = q.filter(Employee.attendance_group_id.in_([int(x) for x in f['att_group_id']]))
-        if f['kafala_vals']:
-            q = q.filter(Employee.kafala.in_(f['kafala_vals']))
-        if f['office_ids']:
-            q = q.filter(Employee.office_id.in_([int(x) for x in f['office_ids']]))
+        # Filter employees from Excel
+        filtered = all_employees[:]
 
-        employees = q.order_by(Employee.region, Employee.full_name).all()
+        if f['regions']:
+            filtered = [e for e in filtered if e.get('region') in f['regions']]
+        if f['nat_group'] == 'سعودي':
+            filtered = [e for e in filtered if e.get('nation') == 'سعودي']
+        elif f['nat_group'] == 'غير سعودي':
+            filtered = [e for e in filtered if e.get('nation') and e.get('nation') != 'سعودي']
+        if f['status_ids']:
+            status_names = [s.name_ar for s in all_statuses if str(s.id) in f['status_ids']]
+            filtered = [e for e in filtered if e.get('status') in status_names]
+        if f['kafala_vals']:
+            filtered = [e for e in filtered if e.get('kafala') in f['kafala_vals']]
+
+        # Convert to mock employee objects for template
+        class MockEmployee:
+            def __init__(self, data):
+                self.data = data
+            def __getattr__(self, name):
+                return self.data.get(name, '')
+
+        employees = [MockEmployee(e) for e in sorted(filtered, key=lambda x: (x.get('region', ''), x.get('name', '')))]
 
     return render_template('reports/filter_report.html',
                            job_codes=job_codes,
@@ -573,12 +599,12 @@ ORG_CHART_REGION_MAP = {
 @reports_bp.route('/org-chart')
 @login_required
 def org_chart_landing():
-    """Landing page: 4 region cards."""
+    """Landing page: 4 region cards (reversed order per audit)."""
     regions = [
-        {'code': 'asir', 'name': 'عسير'},
-        {'code': 'jizan', 'name': 'جازان'},
-        {'code': 'baha', 'name': 'الباحة'},
         {'code': 'najran', 'name': 'نجران'},
+        {'code': 'baha', 'name': 'الباحة'},
+        {'code': 'jizan', 'name': 'جازان'},
+        {'code': 'asir', 'name': 'عسير'},
     ]
     return render_template('reports/org_chart_landing.html', regions=regions)
 
