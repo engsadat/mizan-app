@@ -5,12 +5,14 @@ from pathlib import Path
 from flask import render_template, request
 from flask_login import login_required
 from app.blueprints.reports import reports_bp
-from app.models import Employee, EmployeeStatus, JobCode, AttendanceGroup, Nationality, Office, Project
-from app import db
+from app.excel_data import (
+    load_employees, load_projects, employee_statuses,
+    STATUS_ON_STRENGTH, STATUS_REPLACEMENT, ONGOING_STATE,
+)
+from types import SimpleNamespace as _NS
 
 REGIONS = ['عسير', 'جازان', 'الباحة', 'نجران']
 REGION_CODES = {'عسير': 'AS', 'جازان': 'JZ', 'الباحة': 'BA', 'نجران': 'NJ'}
-ONGOING_STATE = 'تحت التنفيذ'
 
 
 def _b64_logo(rel_path):
@@ -30,13 +32,12 @@ def _b64_logo(rel_path):
 
 
 def _chart_data():
-    rows = (
-        db.session.query(Employee.region, Employee.category, JobCode.title)
-        .join(EmployeeStatus, Employee.current_status_id == EmployeeStatus.id)
-        .outerjoin(JobCode, Employee.job_code_id == JobCode.id)
-        .filter(EmployeeStatus.name_ar == 'على قوة العمل')
-        .all()
-    )
+    rows = []
+    for e in load_employees():
+        if not e.current_status or e.current_status.name_ar != STATUS_ON_STRENGTH:
+            continue
+        title = e.job_code.title if e.job_code else ''
+        rows.append(_NS(region=e.region, category=e.category, title=title))
 
     def cnt(fn):
         return [sum(1 for r in rows if r.region == reg and fn(r)) for reg in REGIONS]
@@ -95,54 +96,56 @@ REPORT_COLUMNS = [
 @reports_bp.route('/filter-report', methods=['GET', 'POST'])
 @login_required
 def filter_report():
-    job_codes    = JobCode.query.order_by(JobCode.title).all()
-    att_groups   = AttendanceGroup.query.order_by(AttendanceGroup.name).all()
-    all_statuses = EmployeeStatus.query.order_by(EmployeeStatus.name_ar).all()
-    kafala_opts  = sorted(set(
-        r[0] for r in db.session.query(Employee.kafala).filter(Employee.kafala.isnot(None), Employee.kafala != '').all()
-    ))
-    offices      = Office.query.order_by(Office.name).all()
+    all_emps = load_employees()
+    job_titles = sorted({e.job_code.title for e in all_emps if e.job_code})
+    job_codes = [_NS(id=t, title=t) for t in job_titles]
+    att_names = sorted({e.attendance_group.name for e in all_emps if e.attendance_group})
+    att_groups = [_NS(id=n, name=n) for n in att_names]
+    all_statuses = employee_statuses(all_emps)
+    kafala_opts = sorted({e.kafala for e in all_emps if e.kafala})
+    office_names = sorted({e.office.name for e in all_emps if e.office})
+    offices = [_NS(id=n, name=n) for n in office_names]
 
-    employees       = []
+    employees = []
     filters_applied = False
-    selected_cols   = [k for k, _, default in REPORT_COLUMNS if default]
-    f               = {}
+    selected_cols = [k for k, _, default in REPORT_COLUMNS if default]
+    f = {}
 
     if request.method == 'POST':
         filters_applied = True
         f = {
-            'regions':      request.form.getlist('regions'),
-            'nat_group':    request.form.get('nat_group', ''),
-            'supervision':  request.form.get('supervision', ''),
-            'status_ids':   request.form.getlist('status_ids'),
+            'regions': request.form.getlist('regions'),
+            'nat_group': request.form.get('nat_group', ''),
+            'supervision': request.form.get('supervision', ''),
+            'status_ids': request.form.getlist('status_ids'),
             'job_code_ids': request.form.getlist('job_code_ids'),
             'att_group_id': request.form.getlist('att_group_id'),
-            'kafala_vals':  request.form.getlist('kafala_vals'),
-            'office_ids':   request.form.getlist('office_ids'),
+            'kafala_vals': request.form.getlist('kafala_vals'),
+            'office_ids': request.form.getlist('office_ids'),
         }
         selected_cols = request.form.getlist('cols') or selected_cols
 
-        q = Employee.query.outerjoin(Employee.current_status)
+        rows = all_emps
         if f['regions']:
-            q = q.filter(Employee.region.in_(f['regions']))
+            rows = [e for e in rows if e.region in f['regions']]
         if f['nat_group'] == 'سعودي':
-            q = q.join(Employee.nationality).filter(Nationality.name_ar == 'سعودي')
+            rows = [e for e in rows if e.nationality and e.nationality.name_ar == 'سعودي']
         elif f['nat_group'] == 'غير سعودي':
-            q = q.join(Employee.nationality).filter(Nationality.name_ar != 'سعودي')
+            rows = [e for e in rows if not e.nationality or e.nationality.name_ar != 'سعودي']
         if f['supervision']:
-            q = q.filter(Employee.supervision_type == f['supervision'])
+            rows = [e for e in rows if e.supervision_type == f['supervision']]
         if f['status_ids']:
-            q = q.filter(Employee.current_status_id.in_([int(x) for x in f['status_ids']]))
+            rows = [e for e in rows if e.current_status and e.current_status.id in f['status_ids']]
         if f['job_code_ids']:
-            q = q.filter(Employee.job_code_id.in_([int(x) for x in f['job_code_ids']]))
+            rows = [e for e in rows if e.job_code and e.job_code.id in f['job_code_ids']]
         if f['att_group_id']:
-            q = q.filter(Employee.attendance_group_id.in_([int(x) for x in f['att_group_id']]))
+            rows = [e for e in rows if e.attendance_group and e.attendance_group.id in f['att_group_id']]
         if f['kafala_vals']:
-            q = q.filter(Employee.kafala.in_(f['kafala_vals']))
+            rows = [e for e in rows if e.kafala in f['kafala_vals']]
         if f['office_ids']:
-            q = q.filter(Employee.office_id.in_([int(x) for x in f['office_ids']]))
+            rows = [e for e in rows if e.office and e.office.id in f['office_ids']]
 
-        employees = q.order_by(Employee.region, Employee.full_name).all()
+        employees = sorted(rows, key=lambda e: ((e.region or ''), e.full_name or ''))
 
     return render_template('reports/filter_report.html',
                            job_codes=job_codes,
@@ -165,21 +168,22 @@ def filter_report():
 def emp_kpi():
     region = request.args.get('region', '')
 
-    base_q = Employee.query.join(Employee.current_status).filter(
-        EmployeeStatus.name_ar == 'على قوة العمل'
-    )
+    employees = [
+        e for e in load_employees()
+        if e.current_status and e.current_status.name_ar == STATUS_ON_STRENGTH
+    ]
     if region and region in REGIONS:
-        base_q = base_q.filter(Employee.region == region)
-    employees = base_q.all()
+        employees = [e for e in employees if e.region == region]
 
     total_active = len(employees)
-    saudi_count  = sum(1 for e in employees if e.nationality and e.nationality.name_ar == 'سعودي')
-    non_saudi    = total_active - saudi_count
+    saudi_count = sum(1 for e in employees if e.nationality and e.nationality.name_ar == 'سعودي')
+    non_saudi = total_active - saudi_count
 
-    repl_q = Employee.query.join(Employee.current_status).filter(EmployeeStatus.name_ar == 'بديل')
-    if region and region in REGIONS:
-        repl_q = repl_q.filter(Employee.region == region)
-    replacement_count = repl_q.count()
+    replacement_count = sum(
+        1 for e in load_employees()
+        if e.current_status and e.current_status.name_ar == STATUS_REPLACEMENT
+        and (not region or region not in REGIONS or e.region == region)
+    )
 
     # Region bars
     region_counts = Counter(e.region for e in employees if e.region)
@@ -264,8 +268,8 @@ def _msar(v):
 
 
 def _project_pivot_data():
-    """Included=Yes. KPIs + charts = تحت التنفيذ by region. Tables = all statuses."""
-    projects = Project.query.filter_by(included=True).all()
+    """Included=Yes from Excel. KPIs + charts = تحت التنفيذ by region."""
+    projects = load_projects(included_only=True)
 
     def region_of(p):
         return (p.region or '').strip() or 'غير محدد'
@@ -661,98 +665,135 @@ def org_chart_view(region):
 
 # ─── SMART CHART (Interactive Dynamic Org Chart) ───────────────────────────────
 
+def _org_search_blob(office, re_name, emps, projs):
+    bits = [office or '', re_name or '']
+    for emp in emps:
+        bits.append(emp.get('name', ''))
+        bits.append(emp.get('job', ''))
+    for proj in projs:
+        bits.append(proj.get('name', ''))
+        bits.append(proj.get('contractor', ''))
+        bits.append(proj.get('status', ''))
+    return ' '.join(bits).lower()
+
+
+def _card(office, re_name, kind, emps, projs, phone=''):
+    jobs = {}
+    for emp in emps:
+        jobs.setdefault(emp.get('job') or '—', []).append(emp)
+    return {
+        'office': office or re_name,
+        'phone': phone,
+        'kind': kind,
+        'employees': emps,
+        'projects': projs,
+        'jobs': jobs,
+        'search': _org_search_blob(office, re_name, emps, projs),
+    }
+
+
 @reports_bp.route('/org-chart-smart')
 @login_required
 def org_chart_smart():
-    """Interactive dynamic org chart — live from Excel sources (same as static charts)."""
-    import openpyxl, shutil, os
+    """Interactive org chart — live from Excel (Office-RE + employees + projects)."""
     from collections import defaultdict
-    from pathlib import Path
+    from app.excel_data import (
+        load_copy, load_office_re, employees_path, projects_path,
+        sv, match_office_name, norm_person, STATUS_ON_STRENGTH,
+    )
 
-    # Try local development path first, then PythonAnywhere path
-    local_data = Path(__file__).parent.parent.parent.parent / 'data'
-    server_data = Path('/home/southMizan/mizan-app/data')
-    DATA_DIR = local_data if local_data.exists() else server_data
-
-    def sv(v):
-        """Safe value helper."""
-        if v is None:
-            return ''
-        s = str(v).strip()
-        err_vals = {'#REF!', '=#REF!', '#VALUE!', '#N/A', '#NAME?', '#DIV/0!', '#NULL!', '#NUM!'}
-        return '' if s in err_vals else s
-
-    def load_copy(path):
-        """Load Excel safely (copy to temp, avoid lock)."""
-        tmp = str(path) + '.tmp.xlsx'
-        shutil.copy2(path, tmp)
-        wb = openpyxl.load_workbook(tmp, data_only=True)
-        os.remove(tmp)
-        return wb
-
-    # Load Excel data
     try:
-        # RE directory
-        wb_re = load_copy(DATA_DIR / 'Organize' / 'Office-RE.xlsx')
-        ws_re = wb_re['RE_Mail']
-        re_info = {}
-        for row in ws_re.iter_rows(min_row=2, max_row=ws_re.max_row, values_only=True):
-            name = sv(row[1])
-            region = sv(row[4])
-            oname = sv(row[8])
-            phone = sv(row[3])
-            if name and region:
-                re_info[name] = {'region': region, 'office': oname, 'phone': phone}
+        offices = load_office_re()
+        canon_by_norm = {norm_person(o.name): o.name for o in offices}
 
-        # Employees
-        wb_emp = load_copy(DATA_DIR / 'source' / 'employees data source.xlsx')
-        ws_emp = wb_emp['data']
+        wb_emp = load_copy(employees_path())
         emp_by_re = defaultdict(list)
-        for row in ws_emp.iter_rows(min_row=2, max_row=ws_emp.max_row, values_only=True):
-            if sv(row[11]) != 'على قوة العمل':
-                continue
-            re_name = sv(row[27])
-            emp_name = sv(row[20])
-            job = sv(row[21])
-            region = sv(row[16])
-            if re_name and emp_name:
-                emp_by_re[re_name].append({'name': emp_name, 'job': job, 'region': region})
+        leftover = defaultdict(list)
+        if wb_emp is not None:
+            try:
+                ws_emp = wb_emp['data']
+            except KeyError:
+                ws_emp = wb_emp.active
+            for row in ws_emp.iter_rows(min_row=2, values_only=True):
+                if sv(row[11]) != STATUS_ON_STRENGTH:
+                    continue
+                emp_name = sv(row[20])
+                if not emp_name:
+                    continue
+                rec = {
+                    'name': emp_name,
+                    'job': sv(row[21]),
+                    'region': sv(row[16]),
+                }
+                re_raw = sv(row[27])
+                canon = match_office_name(re_raw, canon_by_norm) if re_raw else None
+                if canon:
+                    emp_by_re[canon].append(rec)
+                else:
+                    leftover[(rec['region'] or 'غير محدد', re_raw or 'بدون RE')].append(rec)
 
-        # Projects
-        wb_pro = load_copy(DATA_DIR / 'source' / 'project_2026_database_ver1_updated.xlsx')
-        ws_pro = wb_pro['pro']
+        wb_pro = load_copy(projects_path())
         proj_by_re = defaultdict(list)
         region_col = {'عسير': 30, 'جازان': 31, 'الباحة': 32, 'نجران': 33}
-        for row in ws_pro.iter_rows(min_row=2, max_row=ws_pro.max_row, values_only=True):
-            if not (row[10] and str(row[10]).lower() == 'yes'):
-                continue
-            proj_name = sv(row[12])
-            status = sv(row[23])
-            for region, cidx in region_col.items():
-                re_name = sv(row[cidx])
-                if re_name and proj_name:
-                    proj_by_re[re_name].append({'name': proj_name, 'status': status, 'region': region})
+        if wb_pro is not None:
+            try:
+                ws_pro = wb_pro['pro']
+            except KeyError:
+                ws_pro = wb_pro.active
+            for row in ws_pro.iter_rows(min_row=2, values_only=True):
+                if sv(row[10]).lower() != 'yes':
+                    continue
+                proj = {
+                    'name': sv(row[12]) or 'بدون اسم',
+                    'status': sv(row[23]),
+                    'contractor': sv(row[18]),
+                    'region': sv(row[17]),
+                }
+                for _region, cidx in region_col.items():
+                    re_raw = sv(row[cidx]) if row and len(row) > cidx else ''
+                    if not re_raw:
+                        continue
+                    key = match_office_name(re_raw, canon_by_norm) or re_raw
+                    proj_by_re[key].append(proj)
 
-        # Organize by region
-        data_by_region = defaultdict(lambda: defaultdict(lambda: {'employees': [], 'projects': []}))
-        for re_name, info in re_info.items():
-            region = info['region']
-            data_by_region[region][re_name]['employees'] = emp_by_re.get(re_name, [])
-            data_by_region[region][re_name]['projects'] = proj_by_re.get(re_name, [])
+        data_by_region = defaultdict(dict)
+        for o in offices:
+            emps = emp_by_re.get(o.name, [])
+            projs = proj_by_re.get(o.name, [])
+            data_by_region[o.region][o.name] = _card(
+                o.office or o.name, o.name, 'office', emps, projs, o.phone,
+            )
 
-        # Calculate KPIs
+        for (region, raw), emps in leftover.items():
+            projs = proj_by_re.get(raw, [])
+            data_by_region[region][raw] = _card(raw, raw, 'support', emps, projs)
+
         region_kpis = {}
         for region in REGIONS:
-            res = data_by_region[region]
+            res = data_by_region.get(region) or {}
+            office_cards = [d for d in res.values() if d.get('kind') != 'support']
             total_emp = sum(len(d['employees']) for d in res.values())
             total_proj = sum(len(d['projects']) for d in res.values())
-            total_con = len({p['name'] for d in res.values() for p in d['projects']})
-            region_kpis[region] = {'emp': total_emp, 'proj': total_proj, 'con': total_con, 're': len(res)}
+            contractors = {
+                p.get('contractor')
+                for d in res.values()
+                for p in d['projects']
+                if p.get('contractor')
+            }
+            region_kpis[region] = {
+                'emp': total_emp,
+                'proj': total_proj,
+                'con': len(contractors),
+                're': len(office_cards) or len(res),
+            }
 
-        return render_template('reports/org_chart_smart.html',
-                             regions=REGIONS,
-                             data=dict(data_by_region),
-                             kpis=region_kpis)
+        return render_template(
+            'reports/org_chart_smart.html',
+            regions=REGIONS,
+            data=dict(data_by_region),
+            kpis=region_kpis,
+            now=date.today().strftime('%Y-%m-%d'),
+        )
 
     except Exception as e:
         return f'<h1>خطأ في تحميل البيانات</h1><p>{str(e)}</p>', 500
@@ -764,12 +805,6 @@ def project_map_smart():
     """Interactive project map by RE — live from Excel sources."""
     import openpyxl, shutil, os, json
     from collections import defaultdict, Counter
-    from pathlib import Path
-
-    # Try local development path first, then PythonAnywhere path
-    local_data = Path(__file__).parent.parent.parent.parent / 'data'
-    server_data = Path('/home/southMizan/mizan-app/data')
-    DATA_DIR = local_data if local_data.exists() else server_data
 
     def sv(v):
         if v is None:
@@ -809,7 +844,8 @@ def project_map_smart():
         }
 
         # Load projects
-        wb = load_copy(DATA_DIR / 'source' / 'project_2026_database_ver1_updated.xlsx')
+        from app.excel_data import projects_path
+        wb = load_copy(projects_path())
         ws = wb['pro']
 
         points = []

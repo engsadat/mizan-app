@@ -1,60 +1,55 @@
-# Mizan — current status (2026-08-29)
+# Mizan — current status (2026-08-30)
 
 Update this file at the end of every session. Then `git commit` + `git push`.
 Next chat: open `mizan-app` → read `CLAUDE.md` + this file → **one** task.
 Do not save status to a Claude memo.
 
-## Live (checked 2026-08-29)
+## Live (checked 2026-08-30)
 
-- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` 200 OK)
-- CSRF: session cookie includes `csrf_token`; flags Secure + HttpOnly + SameSite=Lax
-- Login test this session: **not checked**
-- Last successful login recorded: 2026-08-26 (admin user; do not treat as re-verified)
+- URL: https://southmizan.pythonanywhere.com — **not checked** this session (Excel-first code is local; **not deployed**)
+- CSRF: not checked this session
+- Login test this session: **not checked** on live
+- Local Flask: `http://127.0.0.1:5001` (`run.py`, no reloader). Local login works (admin user in `instance/mizan_dev.db` — do not record passwords)
 
-## Code (checked 2026-08-29)
+## Code (checked 2026-08-30)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local laptop = `origin/master` @ `a438eb5`
-- PythonAnywhere HEAD: **not checked** this session (last recorded match was `c1285d8` / later reload; do not assume it equals `a438eb5`)
-- Working tree on laptop: STATUS.md updated this session only
+- `origin/master` SHA: `a438eb5` (laptop was 1 commit ahead of origin before this session save)
+- PythonAnywhere HEAD: **not checked**
+- Local tests this session: `pytest tests -q` → **39 passed, 3 skipped**
 
-## Leftovers (checked 2026-08-29)
+## Leftovers (checked 2026-08-30)
 
-User deleted both folders. Verified gone earlier today:
-
-- `C:\Users\engsa\OneDrive\Desktop\AI\hr_webapp` — gone
-- `C:\Users\engsa\OneDrive\Desktop\AI\nwc-mizan-webapp` — gone
-
-Canonical clone intact: `C:\Users\engsa\OneDrive\Desktop\AI\HR\mizan` → `engsadat/mizan-app`.
-
-If PA stash `pa-before-pull-2026-08-29` still exists, restore Excel only (do not restore HTML/templates, do not commit). Do not `git add` untracked `routes.py.bak` or `app/org_charts/`.
+- Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees). Print files were restored from git.
+- Several Flask processes on `:5001` caused the UI to keep showing SQLite (4 employees) after Excel-first. `run.py` now starts with `debug=False, use_reloader=False`. One server only.
+- Local SQLite `users` was empty until an admin was created with `scripts/setup_admin.py`. SQLite employees table still has a stale 4-row import; the app no longer reads it.
+- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; not part of this commit.
 
 ## Product (this version)
 
 Three home cards: الموظفون، التقارير، الإعدادات.
 Settings = job codes + users. Roles: admin | editor | viewer.
-Reports: BI + filter + finance + org charts + project map + projects dashboard.
-No SCD, no V2, no second codebase.
+**This phase: Excel is the system of record for business data.** SQLite = login / users only. Team still edits shareable `.xlsx` files. SQL conversion is later.
 
-## Latest work (2026-08-29) — Excel → DB design review
+Employee add / edit / status in the app is **403**. Edit the Excel file, then refresh. Download: `/employees/export.xlsx`.
 
-Reviewed how Excel files feed SQLite. **No code change.**
+## Latest work (2026-08-30) — Excel-first + org charts
 
-Verdict: intended pattern is ETL (Excel staging → DB system of record → reports). Actual pattern is a split brain.
+Business reads no longer use SQLite employees/projects.
 
-Evidence from local `instance/mizan_dev.db`: all 227 `projects.name` values are numeric (column L `القيمة مع الضريبة2` imported as the name). `/reports/projects-dashboard` reads that table. `/reports/project-map-smart` and `/reports/org-chart-smart` still parse the Excel file with a different (correct) column map.
+- New `app/excel_data.py`: employees + projects + Office-RE (correct `pro` columns: name M/12, region R/17, state X/23, value AD/29)
+- Home, employees, HR charts/KPI/filter, projects dashboard → Excel
+- `/reports/` card for لوحة المشاريع
+- Projects dashboard from real Excel: included **181 / 7579.5 MSAR**; تحت التنفيذ **132 / 5847.7 MSAR** (not 0.0)
+- Home on-strength: **444**
+- Print org charts restored from git (professional layout, not the sample stub)
+- Smart org chart: office titles, job/project search, دعم فني cards, RE name matching (spaces / ي vs ى), contractor KPI, all projects with status
+- `pytest.ini` `testpaths = tests`
 
-Finance models + `scripts/load_finance_data.py` exist, but `/reports/finance` reads four `.xlsx` files on every request. Alembic `001_initial.py` does not include `projects` / finance tables; local DB has no `alembic_version`.
+Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.py` as the live read path.
 
 ## Next (one task)
 
-Fix `scripts/import_projects.py` column map to the real `pro` sheet headers, then wipe-and-reimport `projects`:
+Make **print** org charts (`/reports/org-chart/<region>`) generate from Excel on each request (same data as smart chart), so they cannot go stale or get overwritten by `test_org_charts.py`.
 
-- name = M / 12 (`إسم المشروع`)
-- x = D / 3, y = E / 4
-- region = R / 17
-- project_state = X / 23
-- value = AD / 29
-- RE names = AE–AH / 30–33
-
-Do not change the Excel files. After reimport, `/reports/projects-dashboard` should show Arabic names and MSAR values, not tax figures as names.
+Do not deploy to PythonAnywhere until the user asks after reviewing locally.

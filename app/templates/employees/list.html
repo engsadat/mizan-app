@@ -23,7 +23,8 @@
 <div class="container-fluid">
 
   <!-- Count bar -->
-  <div class="d-flex gap-3 mb-3 align-items-center px-1">
+  <div class="d-flex gap-3 mb-3 align-items-center px-1 flex-wrap">
+    <span class="text-muted small">المصدر: ملف Excel المشترك — عدّل الملف ثم حدّث الصفحة</span>
     <span class="fw-bold" style="color:#0a1f3d">على قوة العمل:</span>
     <span class="badge fs-6" style="background:#059669">{{ active_count }}</span>
     <span class="fw-bold text-secondary me-2">بديل:</span>
@@ -35,9 +36,7 @@
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">الموظفون</h5>
         <div class="d-flex gap-2">
-          {% if current_user.role != 'viewer' %}
-          <a href="/employees/add" class="btn btn-sm" style="background:#0a1f3d;color:#fff">+ إضافة موظف</a>
-          {% endif %}
+          <a href="/employees/export.xlsx" class="btn btn-sm btn-outline-secondary">تنزيل Excel</a>
         </div>
       </div>
 

@@ -1,4 +1,6 @@
-from app.models import Employee, EmployeeStatus, EmployeeStatusHistory, User, JobCode
+from pathlib import Path
+from openpyxl import load_workbook
+from app.models import Employee, EmployeeStatus, EmployeeStatusHistory, User
 from app import db
 
 # ── helpers ────────────────────────────────────────────────────────────────────
@@ -11,13 +13,17 @@ def _login(client, app):
         db.session.commit()
     client.post('/auth/login', data={'username': 'op', 'password': 'pw'})
 
-def _seed_employee(app, name='سعد محمد', region='جازان'):
-    with app.app_context():
-        st  = EmployeeStatus(name_ar='على قوة العمل')
-        emp = Employee(full_name=name, cbu='JZ', region=region, current_status=st)
-        db.session.add_all([st, emp])
-        db.session.commit()
-        return emp.id
+def _seed_employee(app, name='سعد محمد', region='جازان', status='على قوة العمل'):
+    path = Path(app.config['EXCEL_SOURCES']['employees'])
+    wb = load_workbook(path)
+    ws = wb['data']
+    row_idx = ws.max_row + 1
+    ws.cell(row_idx, 12, status)   # col 11 status
+    ws.cell(row_idx, 17, region)   # col 16 region
+    ws.cell(row_idx, 21, name)     # col 20 name
+    ws.cell(row_idx, 22, 'مهندس موقع E3')
+    wb.save(path)
+    return row_idx
 
 # ── list tests ─────────────────────────────────────────────────────────────────
 
@@ -83,62 +89,28 @@ def test_profile_shows_5_sections(app, client):
     assert 'الاستبدال' in body
     assert 'سجل الحالة' in body
 
-def test_status_change_creates_history(app, client):
+def test_status_change_is_blocked_excel_phase(app, client):
     _login(client, app)
     eid = _seed_employee(app)
-    with app.app_context():
-        new_st = EmployeeStatus(name_ar='استقالة')
-        db.session.add(new_st)
-        db.session.commit()
-        new_st_id = new_st.id
     r = client.post(f'/employees/{eid}/status', data={
-        'new_status_id': new_st_id,
+        'new_status_id': 1,
         'reason': 'قدم استقالته',
         'change_date': '2026-08-15',
     }, follow_redirects=True)
-    assert r.status_code == 200
-    with app.app_context():
-        count = EmployeeStatusHistory.query.filter_by(employee_id=eid).count()
-        assert count == 1
+    assert r.status_code == 403
 
 
-def _seed_lookups(app):
-    with app.app_context():
-        jc = JobCode(title='مهندس مقيم', code='JOB001', standard_rate=300)
-        st = EmployeeStatus(name_ar='على قوة العمل')
-        db.session.add_all([jc, st])
-        db.session.commit()
-        return jc.id, st.id
-
-def test_add_employee_creates_record(app, client):
+def test_add_employee_is_blocked_excel_phase(app, client):
     _login(client, app)
-    jc_id, st_id = _seed_lookups(app)
-    r = client.post('/employees/add', data={
-        'full_name': 'خالد إبراهيم عمر',
-        'cbu': 'AS',
-        'region': 'عسير',
-        'job_code_id': jc_id,
-        'unit_price': '285',
-        'current_status_id': st_id,
-    }, follow_redirects=True)
-    assert r.status_code == 200
-    with app.app_context():
-        emp = Employee.query.filter_by(full_name='خالد إبراهيم عمر').first()
-        assert emp is not None
-        assert float(emp.unit_price) == 285.0
+    r = client.post('/employees/add', data={'full_name': 'خالد إبراهيم عمر'}, follow_redirects=True)
+    assert r.status_code == 403
 
-def test_edit_employee_updates_name(app, client):
+
+def test_edit_employee_is_blocked_excel_phase(app, client):
     _login(client, app)
     eid = _seed_employee(app, name='الاسم القديم')
-    r = client.post(f'/employees/{eid}/edit', data={
-        'full_name': 'الاسم الجديد',
-        'cbu': 'JZ',
-        'region': 'جازان',
-    }, follow_redirects=True)
-    assert r.status_code == 200
-    with app.app_context():
-        emp = Employee.query.get(eid)
-        assert emp.full_name == 'الاسم الجديد'
+    r = client.post(f'/employees/{eid}/edit', data={'full_name': 'الاسم الجديد'}, follow_redirects=True)
+    assert r.status_code == 403
 
 
 def _login_viewer(client, app):
@@ -199,43 +171,26 @@ def test_region_filter_preserves_search(app, client):
     assert '/employees/?status=active&q=سعد' in body
 
 
-def test_status_change_to_replacement_sets_flag(app, client):
+def test_status_change_to_replacement_is_blocked(app, client):
     _login(client, app)
     eid = _seed_employee(app)
-    with app.app_context():
-        new_st = EmployeeStatus(name_ar='بديل')
-        db.session.add(new_st)
-        db.session.commit()
-        new_st_id = new_st.id
-        assert Employee.query.get(eid).is_replacement is not True
-    client.post(f'/employees/{eid}/status', data={
-        'new_status_id': new_st_id,
+    r = client.post(f'/employees/{eid}/status', data={
+        'new_status_id': 1,
         'reason': 'تعيين بديل',
         'change_date': '2026-08-15',
-    }, follow_redirects=True)
-    with app.app_context():
-        emp = Employee.query.get(eid)
-        assert emp.is_replacement is True
+    })
+    assert r.status_code == 403
 
 
-def test_status_change_from_replacement_clears_flag(app, client):
+def test_status_change_from_replacement_is_blocked(app, client):
     _login(client, app)
-    eid = _seed_employee(app)
-    with app.app_context():
-        emp = Employee.query.get(eid)
-        emp.is_replacement = True
-        new_st = EmployeeStatus(name_ar='استقالة')
-        db.session.add(new_st)
-        db.session.commit()
-        new_st_id = new_st.id
-    client.post(f'/employees/{eid}/status', data={
-        'new_status_id': new_st_id,
+    eid = _seed_employee(app, status='بديل')
+    r = client.post(f'/employees/{eid}/status', data={
+        'new_status_id': 1,
         'reason': 'انتهاء البديل',
         'change_date': '2026-08-15',
-    }, follow_redirects=True)
-    with app.app_context():
-        emp = Employee.query.get(eid)
-        assert emp.is_replacement is False
+    })
+    assert r.status_code == 403
 
 
 def test_profile_salary_label_is_monthly(app, client):

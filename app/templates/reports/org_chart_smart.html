@@ -58,6 +58,7 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
 .sc-card-title { display: flex; flex-direction: column; gap: 2px; }
 .sc-card-office { font-size: 12px; font-weight: 900; color: var(--navy); }
 .sc-card-re { font-size: 10px; font-weight: 700; color: var(--blue); }
+.sc-card.support { border-top-color: var(--teal); }
 .sc-toggle { font-size: 9px; font-weight: 700; color: var(--blue); background: #fff; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--blue); white-space: nowrap; flex-shrink: 0; }
 
 .sc-card-counts { padding: 7px 12px; display: flex; gap: 14px; font-size: 10px; border-bottom: 1px solid var(--bd); }
@@ -70,7 +71,8 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
 /* Projects list */
 .sc-proj-label { font-size: 9px; font-weight: 900; color: var(--gray); margin-bottom: 5px; border-bottom: 1px solid var(--bd); padding-bottom: 3px; }
 .sc-proj-list { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
-.sc-proj-item { background: var(--lg); border-radius: 3px; padding: 3px 8px 3px 4px; font-size: 10px; border-right: 3px solid var(--blue); line-height: 1.4; }
+.sc-proj-item { background: var(--lg); border-radius: 3px; padding: 3px 8px 3px 4px; font-size: 10px; border-right: 3px solid var(--blue); line-height: 1.4; display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.sc-proj-st { font-size: 8px; font-weight: 700; color: var(--gray); white-space: nowrap; flex-shrink: 0; }
 
 /* Team by category */
 .sc-team { margin-bottom: 10px; }
@@ -119,12 +121,16 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
 
   <!-- RE Cards -->
   <div class="sc-grid">
-    {% for re_name, re_data in data[region].items() %}
-    <div class="sc-card" data-searchtext="{{ re_name|lower }}">
+    {% for re_name, re_data in (data[region] if region in data else {}).items() %}
+    <div class="sc-card{% if re_data['kind'] == 'support' %} support{% endif %}" data-searchtext="{{ re_data['search']|lower|e }}">
       <div class="sc-card-hdr" onclick="toggleCard(this)">
         <div class="sc-card-title">
-          <div class="sc-card-office">{{ re_name }}</div>
+          <div class="sc-card-office">{{ re_data['office'] or re_name }}</div>
+          {% if re_data['kind'] == 'support' %}
+          <div class="sc-card-re">دعم فني / إدارات</div>
+          {% else %}
           <div class="sc-card-re">م/ {{ re_name }}</div>
+          {% endif %}
         </div>
         <div class="sc-toggle">{{ re_data['employees']|length + re_data['projects']|length }}</div>
       </div>
@@ -139,29 +145,24 @@ body { max-width: 1400px; margin: 0 auto; padding: 0 0 40px; }
         {% if re_data['projects'] %}
         <div class="sc-proj-label">المشاريع</div>
         <div class="sc-proj-list">
-          {% for proj in re_data['projects'][:3] %}
-          <div class="sc-proj-item" data-searchtext="{{ proj['name']|lower }}">{{ proj['name'] }}</div>
+          {% for proj in re_data['projects'] %}
+          <div class="sc-proj-item">
+            <span>{{ proj['name'] }}</span>
+            {% if proj['status'] %}<span class="sc-proj-st">{{ proj['status'] }}</span>{% endif %}
+          </div>
           {% endfor %}
         </div>
         {% endif %}
 
         <!-- Employees grouped by job -->
-        {% if re_data['employees'] %}
+        {% if re_data['jobs'] %}
         <div class="sc-team">
-          {% set jobs_dict = {} %}
-          {% for emp in re_data['employees'] %}
-            {% if emp['job'] not in jobs_dict %}
-              {% if jobs_dict.update({emp['job']: []}) %}{% endif %}
-            {% endif %}
-            {% if jobs_dict[emp['job']].append(emp) %}{% endif %}
-          {% endfor %}
-
-          {% for job, emps in jobs_dict.items() %}
+          {% for job, emps in re_data['jobs'].items() %}
           <div class="sc-team-cat">
             <div class="sc-team-cat-hdr">{{ job }}</div>
             <div class="sc-team-names">
               {% for emp in emps %}
-              <div class="sc-team-name" data-searchtext="{{ emp['name']|lower }}">{{ emp['name'] }}</div>
+              <div class="sc-team-name">{{ emp['name'] }}</div>
               {% endfor %}
             </div>
           </div>
@@ -187,7 +188,8 @@ function switchTab(tab) {
   tabs.forEach(t => t.classList.remove('active'));
   sections.forEach(s => s.classList.remove('active'));
   tab.classList.add('active');
-  document.querySelector(`[data-region="${tab.textContent}"]`).classList.add('active');
+  const name = tab.textContent.trim();
+  document.querySelector(`[data-region="${name}"]`).classList.add('active');
 }
 
 function toggleCard(hdr) {
@@ -202,9 +204,14 @@ function filterCards(inp) {
 
   cards.forEach(card => {
     const text = card.getAttribute('data-searchtext') || '';
-    const matches = text.includes(q) || q === '';
+    const matches = !q || text.includes(q);
     card.classList.toggle('sc-hidden', !matches);
-    if (matches && q) count++;
+    if (q && matches) {
+      card.classList.add('open');
+      count++;
+    } else if (!q) {
+      card.classList.remove('open');
+    }
   });
 
   const countEl = section.querySelector('.sc-search-count');

@@ -15,9 +15,6 @@
 <div class="container py-3">
   <div class="d-flex justify-content-between mb-3">
     <h5>{{ emp.full_name }}</h5>
-    {% if current_user.role != 'viewer' %}
-    <a href="/employees/{{ emp.id }}/edit" class="btn btn-sm btn-outline-secondary">تعديل</a>
-    {% endif %}
   </div>
 
   <div class="accordion" id="profileAccordion">
@@ -122,11 +119,7 @@
       </h2>
       <div id="sec5" class="accordion-collapse collapse" data-bs-parent="#profileAccordion">
         <div class="accordion-body">
-          {% if current_user.role != 'viewer' %}
-          <button class="btn btn-sm btn-outline-danger mb-3" data-bs-toggle="modal" data-bs-target="#statusModal">
-            تغيير الحالة
-          </button>
-          {% endif %}
+          <p class="text-muted small">الحالة تُعدَّل في ملف Excel المشترك.</p>
           <ul class="list-group list-group-flush">
             {% for h in emp.status_history %}
             <li class="list-group-item py-2">
@@ -146,45 +139,6 @@
 
   </div>
 </div>
-
-{% if current_user.role != 'viewer' %}
-<!-- Status Change Modal -->
-<div class="modal fade" id="statusModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">تغيير حالة الموظف</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" action="/employees/{{ emp.id }}/status">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">الحالة الجديدة</label>
-            <select name="new_status_id" class="form-select" required>
-              {% for st in statuses %}
-              <option value="{{ st.id }}">{{ st.name_ar }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">تاريخ التغيير</label>
-            <input type="date" name="change_date" class="form-control" value="{{ today }}" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">السبب</label>
-            <textarea name="reason" class="form-control" rows="2"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-          <button type="submit" class="btn btn-danger">حفظ التغيير</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
