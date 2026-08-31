@@ -58,9 +58,19 @@ Last Excel copy from HR `source/` on 2026-08-31: **444** on strength, **181** in
 - Some `tests/test_employees.py` fail: tests seed SQLite; the app list reads Excel.
 - `data/Organize/Office-RE.xlsx` may show a tiny local Excel binary diff — leave uncommitted unless the user asks.
 - Dead copies: do not develop `nwc-mizan-webapp` or Claude-Projects Mizan V2. Close Claude-Projects PR #2 without merging.
+- `C:\Users\engsa\OneDrive\Desktop\AI\mizan-app` is a second clone. Do not write specs or code there. Canonical laptop dir is this folder only.
+- Do **not** add a “refresh data” button or `POST /api/refresh-data`. Excel is already read from disk on every request. No in-memory cache. Print org A/B stay stale until `gen_org_chart.py` / `gen_org_chart_tel.py`.
+
+## Session 9 — Fix Template Attributes ✅
+
+Fixed blank employee names / jobs / status on list and side panel.
+
+**Completed:**
+- Replaced wrong attribute names in `app/templates/employees/list.html` (emp.name → emp.full_name, etc.)
+- Replaced wrong attribute names in `app/templates/employees/_panel.html` (same mappings)
+- Tests passing: test_employee_list_shows_employee, test_employee_list_filter_by_region, test_side_panel_returns_employee_name, test_side_panel_hides_edit_for_viewer ✅
+- Commit: `c6d81bc`
 
 ## Next (one task)
 
-Pull latest `master` on PythonAnywhere (`git pull origin master` then Reload) so live matches GitHub, including Tel B **قيد المراجعة**.
-
-After that, wait for the user. Do **not** start Phase 2 (SQL writes or Excel writes from the UI) until they choose: keep Excel, or move employees/projects to SQL — not both, not a second app.
+Decide what to do about `test_org_chart_print_is_tel_version` (still failing — expects "مع الاتصال" Tel version label but page shows original version). This is a separate issue from the template attributes and may require investigating org-chart route or static files.
