@@ -9,26 +9,28 @@ Do not save status to a Claude memo.
 - URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` HTTP 200)
 - CSRF: not checked this session
 - Login test this session: **not checked**
-- Code deployed: **not reloaded from this laptop** (SSH `southMizan@ssh.pythonanywhere.com` → Permission denied)
+- Code on the server: **behind GitHub**. Laptop SSH to `southMizan@ssh.pythonanywhere.com` → Permission denied. No API token on this laptop.
+- Live Asir static chart still has the old title `المنطقة الجنوبية - NWC`. GitHub already has the current print files.
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Pulled `origin/master` first (fast-forward `d740d79` → `4bc1477`)
-- This session: Tel print org charts (مع الاتصال) committed and pushed as `5b85570`
-- `origin/master`: `5b85570`
-- PythonAnywhere HEAD: **not read** this session (no SSH). Last recorded by previous STATUS: `d740d79`
+- Laptop working tree: **clean**, tracking `origin/master`
+- `origin/master` before this STATUS write: `714071b` (`Record origin SHA 5b85570 after pushing Tel org charts.`)
+- App code already on GitHub (do **not** redo this work):
+  - `5b85570` — print org charts with employee phones (مع الاتصال)
+  - `4bc1477` / `a245bdd` — Phase 1 merge on GitHub
+- PythonAnywhere HEAD: **not read** this session. Last recorded SHA on the server: `d740d79`
 - Local tests this session: `pytest tests -q` → **36 passed, 4 failed, 3 skipped**
-  - Reports / Tel print test passed (`test_org_chart_print_is_tel_version`)
-  - 4 failures in `tests/test_employees.py` (SQLite-seeded names not on Excel-backed list/panel). Pre-existing after the Phase 1 merge; not introduced by Tel files
-- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py` — they overwrite Tel HTML
+  - 4 failures in `tests/test_employees.py`: tests seed SQLite names; the app list/panel reads Excel. From the Phase 1 merge. Not a deploy blocker.
+- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py` — they overwrite the print HTML already on GitHub.
 
 ## Leftovers (checked 2026-08-30)
 
 - Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees).
 - Several Flask processes on `:5001` caused the UI to keep showing SQLite (4 employees) after Excel-first. `run.py` now starts with `debug=False, use_reloader=False`. One server only.
 - Local SQLite `users` was empty until an admin was created with `scripts/setup_admin.py`. SQLite employees table still has a stale 4-row import; the app no longer reads it.
-- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; not part of this commit.
+- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; leave it uncommitted unless the user asks.
 
 ## Product (this version)
 
@@ -38,19 +40,17 @@ Settings = job codes + users. Roles: admin | editor | viewer.
 
 Employee add / edit / status in the app is **403**. Edit the Excel file, then refresh. Download: `/employees/export.xlsx`.
 
-## Latest work (2026-08-31) — Tel print org charts ready to pull on PA
+## Latest work (2026-08-31) — GitHub is current; live is not
 
-`/reports/org-chart/<region>` serves professional A3 Tel charts: name + phone for every team member.
+Cursor session: pulled GitHub, committed remaining local print-chart files, pushed `master`.
 
-- Generator: `python scripts/gen_org_chart_tel.py`
-- Landing / reports index copy says مع الاتصال
-- Stash `tel-org-charts-before-pull-2026-08-31` was used only to pull GitHub, then files were restored
+The org-chart rewrite is **done and on GitHub**. Do not treat it as the next task. Do not regenerate those HTML files this session.
 
 Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.py` as the live read path.
 
 ## Next (one task)
 
-On PythonAnywhere Bash, pull this commit and reload the web app (this laptop cannot SSH):
+Deploy GitHub `master` to PythonAnywhere. This laptop cannot SSH. User (or you in a PA Bash console) run:
 
 ```
 cd /home/southMizan/mizan-app
@@ -60,4 +60,6 @@ git log -1 --oneline
 git status -sb
 ```
 
-Then Web tab → Reload `southmizan.pythonanywhere.com`. Confirm print org charts say مع الاتصال.
+Then Web tab → Reload `southmizan.pythonanywhere.com`.
+
+Done when `git log -1` on the server matches GitHub `master`, and a logged-in `/reports/org-chart` load is the GitHub print files (not the old `المنطقة الجنوبية - NWC` stub).
