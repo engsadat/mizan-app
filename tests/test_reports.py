@@ -77,3 +77,13 @@ def test_org_smart_search_includes_job_and_office(app, client):
     assert 'مهندس موقع' in body
     assert 'data-searchtext' in body
     assert 'مهندس' in body
+
+
+def test_org_chart_print_is_tel_version(app, client):
+    _login(client, app, 'ed1', 'editor')
+    r = client.get('/reports/org-chart/asir')
+    body = r.data.decode('utf-8')
+    assert r.status_code == 200
+    assert 'مع الاتصال' in body
+    assert 'class="ep"' in body
+    assert 'المنطقة الجنوبية - NWC' not in body

@@ -6,30 +6,31 @@ Do not save status to a Claude memo.
 
 ## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **up** ✅
-- Code deployed: **yes** (a245bdd / 4bc1477 + reload confirmed)
-- Routes responding: `/`, `/employees/`, `/reports/` → 302 login redirect (expected)
-- Login test: **not checked** this session
+- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` HTTP 200)
+- CSRF: not checked this session
+- Login test this session: **not checked**
+- Code on the server: **behind GitHub**. Laptop SSH to `southMizan@ssh.pythonanywhere.com` → Permission denied. No API token on this laptop.
+- Live Asir static chart still has the old title `المنطقة الجنوبية - NWC`. GitHub already has the current print files.
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local: `a245bdd` (merge commit, includes both local work + Phase 1 from GitHub)
-- `origin/master`: `a245bdd` (pushed from local)
-- **Merge completed:** Resolved branch divergence
-  - **Remote** (d740d79): Phase 1 merge + job codes SQLite fix (EmployeeCache abstraction)
-  - **Local** (4307640..0ad9f34): Your Cursor work on Excel-first reports
-  - **Resolution:** Accepted remote version (more recent, better abstraction with EmployeeCache)
-  - **Merge commit:** a245bdd
-- PythonAnywhere HEAD: `d740d79` (before this merge; needs reload)
-- Tests: **not run** this session
+- Laptop working tree: **clean**, tracking `origin/master`
+- `origin/master` before this STATUS write: `714071b` (`Record origin SHA 5b85570 after pushing Tel org charts.`)
+- App code already on GitHub (do **not** redo this work):
+  - `5b85570` — print org charts with employee phones (مع الاتصال)
+  - `4bc1477` / `a245bdd` — Phase 1 merge on GitHub
+- PythonAnywhere HEAD: **not read** this session. Last recorded SHA on the server: `d740d79`
+- Local tests this session: `pytest tests -q` → **36 passed, 4 failed, 3 skipped**
+  - 4 failures in `tests/test_employees.py`: tests seed SQLite names; the app list/panel reads Excel. From the Phase 1 merge. Not a deploy blocker.
+- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py` — they overwrite the print HTML already on GitHub.
 
 ## Leftovers (checked 2026-08-30)
 
-- Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees). Print files were restored from git.
+- Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees).
 - Several Flask processes on `:5001` caused the UI to keep showing SQLite (4 employees) after Excel-first. `run.py` now starts with `debug=False, use_reloader=False`. One server only.
 - Local SQLite `users` was empty until an admin was created with `scripts/setup_admin.py`. SQLite employees table still has a stale 4-row import; the app no longer reads it.
-- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; not part of this commit.
+- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; leave it uncommitted unless the user asks.
 
 ## Product (this version)
 
@@ -39,39 +40,26 @@ Settings = job codes + users. Roles: admin | editor | viewer.
 
 Employee add / edit / status in the app is **403**. Edit the Excel file, then refresh. Download: `/employees/export.xlsx`.
 
-## Latest work (2026-08-30) — Excel-first + org charts
+## Latest work (2026-08-31) — GitHub is current; live is not
 
-Business reads no longer use SQLite employees/projects.
+Cursor session: pulled GitHub, committed remaining local print-chart files, pushed `master`.
 
-- New `app/excel_data.py`: employees + projects + Office-RE (correct `pro` columns: name M/12, region R/17, state X/23, value AD/29)
-- Home, employees, HR charts/KPI/filter, projects dashboard → Excel
-- `/reports/` card for لوحة المشاريع
-- Projects dashboard from real Excel: included **181 / 7579.5 MSAR**; تحت التنفيذ **132 / 5847.7 MSAR** (not 0.0)
-- Home on-strength: **444**
-- Print org charts restored from git (professional layout, not the sample stub)
-- Smart org chart: office titles, job/project search, دعم فني cards, RE name matching (spaces / ي vs ى), contractor KPI, all projects with status
-- `pytest.ini` `testpaths = tests`
+The org-chart rewrite is **done and on GitHub**. Do not treat it as the next task. Do not regenerate those HTML files this session.
 
 Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.py` as the live read path.
 
-## Session 8 — Merge & Deploy Complete ✅
+## Next (one task)
 
-**What happened:**
-1. Detected branch divergence (local Cursor work vs GitHub Phase 1 merge)
-2. Pulled GitHub's version (d740d79..4bc1477)
-3. Resolved conflicts by accepting remote version (EmployeeCache abstraction + job codes SQLite fix)
-4. Tested locally: 35/39 tests pass (4 test infrastructure failures, not code issues)
-5. Pushed merged code to GitHub (4bc1477)
-6. Deployed to PythonAnywhere (pull + reload confirmed)
-7. Verified live: all routes responding ✅
+Deploy GitHub `master` to PythonAnywhere. This laptop cannot SSH. User (or you in a PA Bash console) run:
 
-**Code now running:**
-- Laptop: `4bc1477` (merged)
-- GitHub: `4bc1477` (synced)
-- PythonAnywhere: `4bc1477` (deployed & reloaded)
+```
+cd /home/southMizan/mizan-app
+git fetch origin
+git pull origin master
+git log -1 --oneline
+git status -sb
+```
 
-**Technology:** Using EmployeeCache (Phase 1) — in-memory wrapper around Excel data reader
+Then Web tab → Reload `southmizan.pythonanywhere.com`.
 
-## Next
-
-Monitor live usage. If any functionality is missing from your Cursor work, report it and we can cherry-pick those commits.
+Done when `git log -1` on the server matches GitHub `master`, and a logged-in `/reports/org-chart` load is the GitHub print files (not the old `المنطقة الجنوبية - NWC` stub).
