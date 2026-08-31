@@ -113,15 +113,15 @@
 <div class="container py-4" style="max-width: 900px;">
   <a href="/reports/" class="back-button">← العودة إلى التقارير</a>
 
-  <h1 class="page-title">الهيكل التنظيمي</h1>
-  <p class="page-subtitle">اختر المنطقة لعرض الهيكل التنظيمي التفصيلي</p>
+  <h1 class="page-title">الهيكل التنظيمي (مع الاتصال)</h1>
+  <p class="page-subtitle">اختر المنطقة — نسخة الطباعة مع رقم هاتف كل موظف</p>
 
   <div class="regions-grid">
     {% for region in regions %}
       <a href="/reports/org-chart/{{ region.code }}" class="region-card card-{{ region.code }}">
         <div class="region-card-icon">📊</div>
         <div class="region-card-name">{{ region.name }}</div>
-        <div class="region-card-hint">عرض الهيكل</div>
+        <div class="region-card-hint">طباعة مع أرقام الاتصال</div>
       </a>
     {% endfor %}
   </div>

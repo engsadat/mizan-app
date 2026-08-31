@@ -6,25 +6,25 @@ Do not save status to a Claude memo.
 
 ## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **not checked** this session
-- Code deployed: **no** (merge commit a245bdd not yet on PythonAnywhere)
+- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` HTTP 200)
+- CSRF: not checked this session
+- Login test this session: **not checked**
+- Code deployed: **not reloaded from this laptop** (SSH `southMizan@ssh.pythonanywhere.com` → Permission denied)
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local: `a245bdd` (merge commit, includes both local work + Phase 1 from GitHub)
-- `origin/master`: `a245bdd` (pushed from local)
-- **Merge completed:** Resolved branch divergence
-  - **Remote** (d740d79): Phase 1 merge + job codes SQLite fix (EmployeeCache abstraction)
-  - **Local** (4307640..0ad9f34): Your Cursor work on Excel-first reports
-  - **Resolution:** Accepted remote version (more recent, better abstraction with EmployeeCache)
-  - **Merge commit:** a245bdd
-- PythonAnywhere HEAD: `d740d79` (before this merge; needs reload)
-- Tests: **not run** this session
+- Pulled `origin/master` first (fast-forward `d740d79` → `4bc1477`)
+- This session adds Tel print org charts (مع الاتصال) on top of that
+- PythonAnywhere HEAD: **not read** this session (no SSH). Last recorded by previous STATUS: `d740d79`
+- Local tests this session: `pytest tests -q` → **36 passed, 4 failed, 3 skipped**
+  - Reports / Tel print test passed (`test_org_chart_print_is_tel_version`)
+  - 4 failures in `tests/test_employees.py` (SQLite-seeded names not on Excel-backed list/panel). Pre-existing after the Phase 1 merge; not introduced by Tel files
+- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py` — they overwrite Tel HTML
 
 ## Leftovers (checked 2026-08-30)
 
-- Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees). Print files were restored from git.
+- Do not run `scripts/test_org_charts.py` against live org HTML — it overwrote professional print charts with sample data (2 fake employees).
 - Several Flask processes on `:5001` caused the UI to keep showing SQLite (4 employees) after Excel-first. `run.py` now starts with `debug=False, use_reloader=False`. One server only.
 - Local SQLite `users` was empty until an admin was created with `scripts/setup_admin.py`. SQLite employees table still has a stale 4-row import; the app no longer reads it.
 - `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; not part of this commit.
@@ -37,26 +37,26 @@ Settings = job codes + users. Roles: admin | editor | viewer.
 
 Employee add / edit / status in the app is **403**. Edit the Excel file, then refresh. Download: `/employees/export.xlsx`.
 
-## Latest work (2026-08-30) — Excel-first + org charts
+## Latest work (2026-08-31) — Tel print org charts ready to pull on PA
 
-Business reads no longer use SQLite employees/projects.
+`/reports/org-chart/<region>` serves professional A3 Tel charts: name + phone for every team member.
 
-- New `app/excel_data.py`: employees + projects + Office-RE (correct `pro` columns: name M/12, region R/17, state X/23, value AD/29)
-- Home, employees, HR charts/KPI/filter, projects dashboard → Excel
-- `/reports/` card for لوحة المشاريع
-- Projects dashboard from real Excel: included **181 / 7579.5 MSAR**; تحت التنفيذ **132 / 5847.7 MSAR** (not 0.0)
-- Home on-strength: **444**
-- Print org charts restored from git (professional layout, not the sample stub)
-- Smart org chart: office titles, job/project search, دعم فني cards, RE name matching (spaces / ي vs ى), contractor KPI, all projects with status
-- `pytest.ini` `testpaths = tests`
+- Generator: `python scripts/gen_org_chart_tel.py`
+- Landing / reports index copy says مع الاتصال
+- Stash `tel-org-charts-before-pull-2026-08-31` was used only to pull GitHub, then files were restored
 
 Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.py` as the live read path.
 
 ## Next (one task)
 
-**Session 8:** Review merged code locally & deploy
-1. Run tests: `pytest tests -q`
-2. If tests pass: reload web app on PythonAnywhere (pull a245bdd)
-3. Test live: verify `/reports/`, `/employees/`, org charts work with EmployeeCache
+On PythonAnywhere Bash, pull this commit and reload the web app (this laptop cannot SSH):
 
-**Known issue:** Local has your Excel-first work (4307640..0ad9f34) but remote's EmployeeCache abstraction (Phase 1) was more recent + has job codes SQLite fix. Accepted remote, now using it. If functionality missing, cherry-pick your commits after local testing passes.
+```
+cd /home/southMizan/mizan-app
+git fetch origin
+git pull origin master
+git log -1 --oneline
+git status -sb
+```
+
+Then Web tab → Reload `southmizan.pythonanywhere.com`. Confirm print org charts say مع الاتصال.
