@@ -6,22 +6,21 @@ Do not save status to a Claude memo.
 
 ## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` shown)
+- URL: https://southmizan.pythonanywhere.com — **up** (user screenshot of A+B org-chart landing)
 - CSRF: not checked this session
 - Login test this session: **not checked**
-- Laptop SSH `southMizan@ssh.pythonanywhere.com`: **Permission denied** (publickey,password). Could not pull or reload from here.
-- Live static Asir (`/static/org_charts/09_OrgChart_Asir.html`): Tel title `الهيكل التنظيمي — عسير (مع الاتصال)` — this is the Tel-only restore, not A+B.
-- Live `/static/org_charts/09_OrgChart_Asir_Tel.html`: **404**. A+B (`de7db9a`) is not on the server yet.
-- PythonAnywhere HEAD: **not read** (no SSH). Believed to be Tel-only (`70540f8` era), not `de7db9a`.
+- Laptop SSH: still **Permission denied** earlier today
+- Org-chart landing on live had A+B icons (so a pull happened). Region cards wrapped to 2 lines (3+1). That wrap is fixed in this commit; live still needs pull.
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Laptop = GitHub: `de7db9a` (`Offer both print org charts: A default without phones, B Tel with phones.`)
-- Print org charts on GitHub:
-  - **A (default):** `/reports/org-chart` → `09–12_OrgChart_*.html`
-  - **B (Tel):** `/reports/org-chart-tel` → `09–12_OrgChart_*_Tel.html`
-- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py`
+- This session:
+  - Region cards: `grid-template-columns: repeat(4, minmax(0, 1fr))` so عسير جازان الباحة نجران stay on **one line**
+  - Excel refresh (copied from `HR/source`, dated 2026-08-31):
+    - `data/source/employees data source.xlsx` — still **444** on strength (575 rows)
+    - `data/source/project_2026_database_ver1_updated.xlsx` — still **181** included (232 rows)
+- Print org charts A/B unchanged. Do **not** run org-chart generator scripts.
 
 ## Leftovers (checked 2026-08-30)
 
@@ -40,16 +39,15 @@ Employee add / edit / status in the app is **403**. Edit the Excel file, then re
 
 ## Next (one task)
 
-This laptop cannot SSH. In the PythonAnywhere **Bash console** run:
+Pull this commit on PythonAnywhere (this laptop cannot SSH). Bash console:
 
 ```
 cd /home/southMizan/mizan-app
 git fetch origin
 git pull origin master
 git log -1 --oneline
-git status -sb
 ```
 
-That log must show `de7db9a`. Then Web tab → Reload `southmizan.pythonanywhere.com`.
+Then Web tab → Reload.
 
-Done when `/reports/` shows icons A 📋 and B 📞, Asir A title is `الهيكل التنظيمي — عسير`, and `/static/org_charts/09_OrgChart_Asir_Tel.html` is no longer 404.
+Done when the four region cards are on **one line**, and live Excel is the 2026-08-31 copy (employee/project files in `data/source/`).
