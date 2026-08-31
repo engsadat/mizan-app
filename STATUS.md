@@ -15,7 +15,8 @@ Do not save status to a Claude memo.
 
 - Canonical: `engsadat/mizan-app` `master`
 - Pulled `origin/master` first (fast-forward `d740d79` → `4bc1477`)
-- This session adds Tel print org charts (مع الاتصال) on top of that
+- This session: Tel print org charts (مع الاتصال) committed and pushed as `5b85570`
+- `origin/master`: `5b85570`
 - PythonAnywhere HEAD: **not read** this session (no SSH). Last recorded by previous STATUS: `d740d79`
 - Local tests this session: `pytest tests -q` → **36 passed, 4 failed, 3 skipped**
   - Reports / Tel print test passed (`test_org_chart_print_is_tel_version`)
