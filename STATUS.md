@@ -7,33 +7,39 @@ Do not save status to a Claude memo.
 ## Live (checked 2026-08-31)
 
 - URL: https://southmizan.pythonanywhere.com — **up**
-- CSRF: not checked this session
-- Login test this session: **not checked**
-- PythonAnywhere last confirmed HEAD: **`cfff41b`** (print charts from RE column). This STATUS/UI commit is not on PA until the next pull.
-- Live Baha print: **سيد عبد الحميد أحمد** under **أحمد صالح عبده** (الباحة_ وسط)
+- CSRF / login: **not checked** this session
+- PythonAnywhere last confirmed code HEAD: **`cfff41b`** (RE-column print charts)
+- GitHub `master`: **`0475811`** (قيد المراجعة badge on Tel B) — needs PA pull if not pulled yet
 - Laptop SSH: **Permission denied**
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Org-chart tree: employees Excel **column 27 (RE)** → `Office-RE.xlsx`
-- **A** `/reports/org-chart` — default print, no employee phones
-- **B** `/reports/org-chart-tel` — Tel print with phones; **قيد المراجعة (Under review)** on the reports cards. Still reachable; not hidden.
+- **This phase is Excel-backed, read-only for business data.** SQLite = login / users / job codes. Do not treat SQLAlchemy `Employee` tables as live.
+- Org-chart tree: employees col 27 (RE) → `Office-RE.xlsx`
+- A default print; B Tel **قيد المراجعة**
 - Do **not** run `scripts/test_org_charts.py`
 
-## Leftovers (checked 2026-08-30)
+## Phase 1 review (2026-08-31)
 
-- PA `git pull` failed once because the server had a local edit of `data/source/employees data source.xlsx`. Fixed with `git checkout --` then pull. Do not `git reset --hard`.
-- `data/Organize/Office-RE.xlsx` may show a tiny local binary diff from Excel; leave it uncommitted unless the user asks.
+Done as a portal: login, three home cards, employees list/search/export from Excel, reports (BI, filter, finance, map, dashboards), print org A/B, smart org chart, settings (job codes + users).
+
+Not done / not this phase: write-from-UI to Excel or SQL, SCD, second app, V2 rewrite.
+
+Future data update (keep this): edit Excel → copy into `data/source/` → if org print must match, run `scripts/gen_org_chart.py` then `scripts/gen_org_chart_tel.py` → `git add` / `commit` / `push` → PA `git pull origin master` → Reload.
+
+## Leftovers
+
+- PA local Excel edits can block `git pull` — `git checkout -- "data/source/employees data source.xlsx"` then pull. Never `reset --hard`.
+- Tests last recorded: some `tests/test_employees.py` failures (tests seed SQLite; app reads Excel).
+- `data/Organize/Office-RE.xlsx` tiny local Excel diff — leave uncommitted unless asked.
 
 ## Product (this version)
 
 Three home cards: الموظفون، التقارير، الإعدادات.
 Settings = job codes + users. Roles: admin | editor | viewer.
-**This phase: Excel is the system of record for business data.** SQLite = login / users only.
-
-Employee add / edit / status in the app is **403**. Edit the Excel file, then refresh. Download: `/employees/export.xlsx`.
+Employee add / edit / status in the app is **403**.
 
 ## Next (one task)
 
-Pull this commit on PythonAnywhere, then Web → Reload, so the قيد المراجعة badge on Tel chart B shows live.
+User to choose: (1) pull `0475811` on PA so Tel B shows قيد المراجعة, or (2) start Phase 2 only after agreeing SQL vs keep-Excel. Do not start a second Mizan.
