@@ -21,21 +21,7 @@ def index():
 @login_required
 def job_codes():
     _admin_only()
-    # Load job codes from Flask config (Excel-backed Phase 1)
-    from flask import current_app
-    job_codes_dict = current_app.config.get('JOB_CODES', {})
-
-    # Convert dict to list of objects with title, code, and rate attributes
-    jcs = [
-        type('JobCode', (), {
-            'title': title,
-            'code': data.get('code', ''),
-            'standard_rate': data.get('rate', 0),
-            'id': idx
-        })()
-        for idx, (title, data) in enumerate(sorted(job_codes_dict.items()), 1)
-    ]
-
+    jcs = JobCode.query.order_by(JobCode.title).all()
     return render_template('settings/job_codes.html', job_codes=jcs, edit_jc=None)
 
 @settings_bp.route('/job-codes/add', methods=['POST'])

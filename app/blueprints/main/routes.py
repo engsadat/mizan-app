@@ -1,35 +1,33 @@
-from flask import render_template, redirect, url_for
-from flask_login import login_required, current_user
+from flask import render_template
+from flask_login import login_required
 from app.blueprints.main import main_bp
-from app.models import Employee, EmployeeStatus
-from app import db
+from app.excel_data import load_employees, STATUS_ON_STRENGTH
+
+
+def _home_kpis():
+    emps = [
+        e for e in load_employees()
+        if e.current_status and e.current_status.name_ar == STATUS_ON_STRENGTH
+    ]
+    monthly_total = sum(e.unit_price or 0 for e in emps)
+    return len(emps), '{:,.0f}'.format(float(monthly_total))
+
 
 @main_bp.route('/')
+@login_required
 def index():
-    """Home page - redirect to dashboard if authenticated, login if not."""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    return redirect(url_for('auth.login'))
+    active_count, monthly_fmt = _home_kpis()
+    return render_template(
+        'main/dashboard.html',
+        active_count=active_count,
+        monthly_total=monthly_fmt,
+    )
+
 
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
-    active_count = (
-        db.session.query(db.func.count(Employee.id))
-        .join(EmployeeStatus, Employee.current_status_id == EmployeeStatus.id)
-        .filter(EmployeeStatus.name_ar == 'على قوة العمل')
-        .scalar() or 0
-    )
-    monthly_total = (
-        db.session.query(db.func.sum(Employee.unit_price))
-        .join(EmployeeStatus, Employee.current_status_id == EmployeeStatus.id)
-        .filter(EmployeeStatus.name_ar == 'على قوة العمل')
-        .scalar() or 0
-    )
-    monthly_fmt = '{:,.0f}'.format(float(monthly_total))
-    return render_template('main/dashboard.html',
-                           active_count=active_count,
-                           monthly_total=monthly_fmt)
+    return index()
 
 
 def register_error_handlers(app):

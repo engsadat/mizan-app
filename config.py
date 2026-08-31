@@ -15,13 +15,14 @@ class Config:
 
     # Excel data sources (can be overridden by environment variables)
     EXCEL_SOURCES = {
-        'employees': os.environ.get('EXCEL_EMPLOYEES') or str(DATA_FOLDER / 'source' / 'employees data source.xlsx'),
-        'projects': os.environ.get('EXCEL_PROJECTS') or str(DATA_FOLDER / 'source' / 'project_2026_database_ver1_updated.xlsx'),
-        'invoices': os.environ.get('EXCEL_INVOICES') or str(DATA_FOLDER / 'Invoices' / 'Jun_Inv.xlsx'),
-        'contacts': os.environ.get('EXCEL_CONTACTS') or str(DATA_FOLDER / 'source' / 'contacts.xlsx'),
         'po_master': os.environ.get('EXCEL_PO_MASTER') or str(DATA_FOLDER / 'po_master.xlsx'),
+        'invoices': os.environ.get('EXCEL_INVOICES') or str(DATA_FOLDER / 'invoices.xlsx'),
         'po6_detail': os.environ.get('EXCEL_PO6') or str(DATA_FOLDER / 'po6_detail.xlsx'),
         'variations': os.environ.get('EXCEL_VARIATIONS') or str(DATA_FOLDER / 'variations.xlsx'),
+        'employees': os.environ.get('EXCEL_EMPLOYEES') or str(DATA_FOLDER / 'source' / 'employees data source.xlsx'),
+        'projects': os.environ.get('EXCEL_PROJECTS') or str(DATA_FOLDER / 'source' / 'project_2026_database_ver1_updated.xlsx'),
+        'office_re': os.environ.get('EXCEL_OFFICE_RE') or str(DATA_FOLDER / 'Organize' / 'Office-RE.xlsx'),
+        'contacts': os.environ.get('EXCEL_CONTACTS') or str(DATA_FOLDER / 'source' / 'contacts.xlsx'),
     }
 
     # Job code constants (Phase 1: hardcoded; Phase 2: load from Excel)
