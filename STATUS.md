@@ -7,23 +7,23 @@ Do not save status to a Claude memo.
 ## Live (checked 2026-08-31)
 
 - URL: https://southmizan.pythonanywhere.com — **up** ✅
-- Code deployed: **yes** (59b73b2 pulled + reloaded)
-- Routes responding: `/`, `/employees/`, `/reports/`, `/reports/org-chart` → correct (302 or 200)
-- Org charts: Tel org charts with employee phone numbers now live
+- Code deployed: **yes** (5b36ac2 — reverted Tel org charts)
+- Routes responding: `/`, `/employees/`, `/reports/`, `/reports/org-chart` → correct
+- Org charts: Original professional version (no phone numbers) — Tel version removed
 - CSRF: working (secure cookies on login)
 - Login test: **not checked** this session
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Local: `59b73b2` (merge commit, fully synced)
-- GitHub: `59b73b2` (synced)
-- PythonAnywhere: `59b73b2` (pulled + reloaded ✅)
+- Local: `5b36ac2` (reverted Tel org charts)
+- GitHub: `5b36ac2` (synced)
+- PythonAnywhere: needs reload (5b36ac2 pending)
 - Code history (all on master):
-  - `5b85570` — print org charts with employee phones (Tel org charts)
+  - `5b36ac2` — **fix:** reverted org charts to original (removed Tel phone version)
+  - `5b85570` — [reverted] Tel org charts with employee phones
   - `4bc1477` / `a245bdd` — Phase 1 merge (EmployeeCache, job codes SQLite fix)
 - Local tests: `pytest tests -q` → 35 passed, 4 failed, 3 skipped
-  - 4 failures in `test_employees.py` (test infrastructure, not deployment blocker)
 
 ## Leftovers (checked 2026-08-30)
 
