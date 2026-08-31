@@ -134,6 +134,16 @@
     .version-glyph { font-size: 2rem; line-height: 1; }
     .version-letter { font-size: 1.1rem; font-weight: 700; }
     .version-label { font-size: 0.85rem; color: #64748b; }
+    .review-badge {
+      display: inline-block;
+      margin-top: 0.35rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #fef3c7;
+      color: #92400e;
+    }
   </style>
 </head>
 <body>
@@ -149,7 +159,7 @@
   <a href="/reports/" class="back-button">← العودة إلى التقارير</a>
 
   <h1 class="page-title">الهيكل التنظيمي</h1>
-  <p class="page-subtitle">نسختان للطباعة — A الافتراضية، B مع أرقام الاتصال</p>
+  <p class="page-subtitle">نسختان للطباعة — A الافتراضية، B مع أرقام الاتصال (قيد المراجعة)</p>
 
   <div class="version-row">
     <a href="/reports/org-chart" class="version-icon{% if not with_phone %} is-active{% endif %}">
@@ -161,6 +171,7 @@
       <span class="version-glyph">📞</span>
       <span class="version-letter">B</span>
       <span class="version-label">مع الاتصال</span>
+      <span class="review-badge">قيد المراجعة</span>
     </a>
   </div>
 
@@ -169,7 +180,7 @@
       <a href="{{ base_path }}/{{ region.code }}" class="region-card card-{{ region.code }}">
         <div class="region-card-icon">{% if with_phone %}📞{% else %}📋{% endif %}</div>
         <div class="region-card-name">{{ region.name }}</div>
-        <div class="region-card-hint">{% if with_phone %}طباعة مع أرقام الاتصال{% else %}طباعة بدون أرقام الاتصال{% endif %}</div>
+        <div class="region-card-hint">{% if with_phone %}طباعة مع أرقام الاتصال — قيد المراجعة{% else %}طباعة بدون أرقام الاتصال{% endif %}</div>
       </a>
     {% endfor %}
   </div>
