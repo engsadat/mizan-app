@@ -99,6 +99,40 @@
     .back-button:hover {
       color: #0d2b5a;
     }
+    .version-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .version-icon {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      padding: 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      background: white;
+      border: 2px solid #dbe3ee;
+      color: #0a1f3d;
+      box-shadow: 0 2px 8px rgba(10, 31, 61, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .version-icon:hover {
+      transform: translateY(-3px);
+      text-decoration: none;
+      color: #0a1f3d;
+      box-shadow: 0 8px 18px rgba(10, 31, 61, 0.12);
+    }
+    .version-icon.is-active {
+      border-color: #0071b9;
+      background: #e8f4fd;
+    }
+    .version-glyph { font-size: 2rem; line-height: 1; }
+    .version-letter { font-size: 1.1rem; font-weight: 700; }
+    .version-label { font-size: 0.85rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -113,15 +147,28 @@
 <div class="container py-4" style="max-width: 900px;">
   <a href="/reports/" class="back-button">← العودة إلى التقارير</a>
 
-  <h1 class="page-title">الهيكل التنظيمي (مع الاتصال)</h1>
-  <p class="page-subtitle">اختر المنطقة — نسخة الطباعة مع رقم هاتف كل موظف</p>
+  <h1 class="page-title">الهيكل التنظيمي</h1>
+  <p class="page-subtitle">نسختان للطباعة — A الافتراضية، B مع أرقام الاتصال</p>
+
+  <div class="version-row">
+    <a href="/reports/org-chart" class="version-icon{% if not with_phone %} is-active{% endif %}">
+      <span class="version-glyph">📋</span>
+      <span class="version-letter">A</span>
+      <span class="version-label">بدون اتصال</span>
+    </a>
+    <a href="/reports/org-chart-tel" class="version-icon{% if with_phone %} is-active{% endif %}">
+      <span class="version-glyph">📞</span>
+      <span class="version-letter">B</span>
+      <span class="version-label">مع الاتصال</span>
+    </a>
+  </div>
 
   <div class="regions-grid">
     {% for region in regions %}
-      <a href="/reports/org-chart/{{ region.code }}" class="region-card card-{{ region.code }}">
-        <div class="region-card-icon">📊</div>
+      <a href="{{ base_path }}/{{ region.code }}" class="region-card card-{{ region.code }}">
+        <div class="region-card-icon">{% if with_phone %}📞{% else %}📋{% endif %}</div>
         <div class="region-card-name">{{ region.name }}</div>
-        <div class="region-card-hint">طباعة مع أرقام الاتصال</div>
+        <div class="region-card-hint">{% if with_phone %}طباعة مع أرقام الاتصال{% else %}طباعة بدون أرقام الاتصال{% endif %}</div>
       </a>
     {% endfor %}
   </div>

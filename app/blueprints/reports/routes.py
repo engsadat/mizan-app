@@ -554,36 +554,56 @@ def finance():
 # ──────────────────────────────────────────────────────────────────────────────
 
 ORG_CHART_REGION_MAP = {
-    'asir': {'ar': 'عسير', 'file': '09_OrgChart_Asir.html'},
-    'jizan': {'ar': 'جازان', 'file': '10_OrgChart_Jizan.html'},
-    'baha': {'ar': 'الباحة', 'file': '11_OrgChart_Baha.html'},
-    'najran': {'ar': 'نجران', 'file': '12_OrgChart_Najran.html'},
+    'asir': {
+        'ar': 'عسير',
+        'file': '09_OrgChart_Asir.html',
+        'file_tel': '09_OrgChart_Asir_Tel.html',
+    },
+    'jizan': {
+        'ar': 'جازان',
+        'file': '10_OrgChart_Jizan.html',
+        'file_tel': '10_OrgChart_Jizan_Tel.html',
+    },
+    'baha': {
+        'ar': 'الباحة',
+        'file': '11_OrgChart_Baha.html',
+        'file_tel': '11_OrgChart_Baha_Tel.html',
+    },
+    'najran': {
+        'ar': 'نجران',
+        'file': '12_OrgChart_Najran.html',
+        'file_tel': '12_OrgChart_Najran_Tel.html',
+    },
 }
 
-
-@reports_bp.route('/org-chart')
-@login_required
-def org_chart_landing():
-    """Landing page: 4 region cards."""
-    regions = [
-        {'code': 'asir', 'name': 'عسير'},
-        {'code': 'jizan', 'name': 'جازان'},
-        {'code': 'baha', 'name': 'الباحة'},
-        {'code': 'najran', 'name': 'نجران'},
-    ]
-    return render_template('reports/org_chart_landing.html', regions=regions)
+ORG_CHART_REGIONS = [
+    {'code': 'asir', 'name': 'عسير'},
+    {'code': 'jizan', 'name': 'جازان'},
+    {'code': 'baha', 'name': 'الباحة'},
+    {'code': 'najran', 'name': 'نجران'},
+]
 
 
-@reports_bp.route('/org-chart/<region>')
-@login_required
-def org_chart_view(region):
-    """View org chart for a region."""
+def _org_chart_landing(tel=False):
+    return render_template(
+        'reports/org_chart_landing.html',
+        regions=ORG_CHART_REGIONS,
+        variant='B' if tel else 'A',
+        with_phone=tel,
+        base_path='/reports/org-chart-tel' if tel else '/reports/org-chart',
+    )
+
+
+def _org_chart_view(region, tel=False):
     if region not in ORG_CHART_REGION_MAP:
         return render_template('error.html',
                               message='منطقة غير صحيحة'), 404
 
     info = ORG_CHART_REGION_MAP[region]
-    org_chart_file = Path(__file__).parent.parent.parent / 'static' / 'org_charts' / info['file']
+    filename = info['file_tel'] if tel else info['file']
+    org_chart_file = (
+        Path(__file__).parent.parent.parent / 'static' / 'org_charts' / filename
+    )
 
     if not org_chart_file.exists():
         return render_template('error.html',
@@ -591,10 +611,43 @@ def org_chart_view(region):
 
     html_content = org_chart_file.read_text(encoding='utf-8')
 
-    return render_template('reports/org_chart_view.html',
-                          region=region,
-                          region_name=info['ar'],
-                          org_chart_html=html_content)
+    return render_template(
+        'reports/org_chart_view.html',
+        region=region,
+        region_name=info['ar'],
+        org_chart_html=html_content,
+        variant='B' if tel else 'A',
+        with_phone=tel,
+        base_path='/reports/org-chart-tel' if tel else '/reports/org-chart',
+    )
+
+
+@reports_bp.route('/org-chart')
+@login_required
+def org_chart_landing():
+    """A — default print org charts (no employee phones)."""
+    return _org_chart_landing(tel=False)
+
+
+@reports_bp.route('/org-chart-tel')
+@login_required
+def org_chart_tel_landing():
+    """B — Tel print org charts (مع الاتصال)."""
+    return _org_chart_landing(tel=True)
+
+
+@reports_bp.route('/org-chart/<region>')
+@login_required
+def org_chart_view(region):
+    """A — default print org chart for a region."""
+    return _org_chart_view(region, tel=False)
+
+
+@reports_bp.route('/org-chart-tel/<region>')
+@login_required
+def org_chart_tel_view(region):
+    """B — Tel print org chart for a region."""
+    return _org_chart_view(region, tel=True)
 
 
 # PDF export disabled - Playwright Chromium not available on PythonAnywhere

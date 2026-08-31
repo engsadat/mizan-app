@@ -6,33 +6,22 @@ Do not save status to a Claude memo.
 
 ## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` shown)
+- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` shown earlier this calendar day)
 - CSRF: not checked this session
-- Login test this session: **not checked** (did not submit credentials)
-- Public static Asir file on live (`/static/org_charts/09_OrgChart_Asir.html`) was the **Ticket 4 grid** (stub title `المنطقة الجنوبية - NWC`, phones **and salaries**). That is the mistaken revert, not Tel.
-- PythonAnywhere HEAD: **not read** (no SSH from this laptop). Files on disk match the revert `5b36ac2` / `7b002f2`, not the restored Tel charts.
+- Login test this session: **not checked**
+- PythonAnywhere HEAD: **not read** (no SSH). Live static Asir was still the Ticket 4 grid when fetched earlier today. It does **not** yet have A+B.
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Laptop working tree: restoring Tel print HTML, then this STATUS
-- `origin/master` before this STATUS write: `7b002f2` (`docs: Update STATUS — org charts reverted to original`)
-- App code history (do **not** redo, do **not** revert Tel again):
-  - `5b85570` — **correct print org charts:** professional A3, office/RE layout, employee phones (`مع الاتصال`), no salaries
-  - `5b36ac2` — **mistaken revert** to Ticket 4 simple grid (`cb9e97b`). Commit message said it removed phones and restored “professional print”; it did the opposite (grid + phones + salaries)
-  - `7b002f2` — STATUS that recorded that revert
-- This session restored the four HTML files from `5b85570`
-- Local tests this session: **not run**
-- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py` — they overwrite the print HTML
-
-## Which org chart is live vs correct
-
-| Label | SHA | What it is | Should be live? |
-|---|---|---|---|
-| Version A / C | `cb9e97b` / `5b36ac2` | Simple employee card grid. Stub title. Phones **and salaries**. Not an office/RE org chart | **No** |
-| Version B (Tel) | `5b85570` | Professional multi-page A3 print. Offices, REs, projects, phones. No salaries. Landing page already says `مع الاتصال` | **Yes** |
-
-User request (2026-08-30): “org chart get tel version”. Tel is the intended print design.
+- Laptop: A+B print org charts (this session)
+- `origin/master` before this STATUS write: `70540f8` (Tel-only restore)
+- Print org charts (do **not** regenerate with scripts):
+  - **A (default):** `09–12_OrgChart_*.html` — professional A3, no employee-phone dump
+  - **B (Tel):** `09–12_OrgChart_*_Tel.html` — same layout with phones (`مع الاتصال`)
+- Routes: `/reports/org-chart` = A, `/reports/org-chart-tel` = B. Reports page shows both icons together.
+- Local check this session: Flask test client (login disabled) → `/reports/`, `/reports/org-chart`, `/reports/org-chart-tel`, Asir A and Asir B all HTTP 200
+- Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py`
 
 ## Leftovers (checked 2026-08-30)
 
@@ -51,7 +40,7 @@ Employee add / edit / status in the app is **403**. Edit the Excel file, then re
 
 ## Next (one task)
 
-Deploy GitHub `master` (Tel print org charts) to PythonAnywhere. This laptop cannot SSH. User (or a PA Bash console) run:
+Deploy GitHub `master` (A default + B Tel org charts) to PythonAnywhere. This laptop cannot SSH. User (or a PA Bash console) run:
 
 ```
 cd /home/southMizan/mizan-app
@@ -63,4 +52,4 @@ git status -sb
 
 Then Web tab → Reload `southmizan.pythonanywhere.com`.
 
-Done when `git log -1` on the server matches GitHub `master`, and `/static/org_charts/09_OrgChart_Asir.html` title is `الهيكل التنظيمي — عسير (مع الاتصال)` (not `المنطقة الجنوبية - NWC`). Do not revert Tel.
+Done when `/reports/` shows two org-chart icons (A 📋 and B 📞), and `/static/org_charts/09_OrgChart_Asir.html` title is `الهيكل التنظيمي — عسير` (not `المنطقة الجنوبية - NWC` and not Tel).

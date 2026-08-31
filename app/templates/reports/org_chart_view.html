@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الهيكل التنظيمي — {{ region_name }} — ميزان</title>
+  <title>{% if with_phone %}الهيكل التنظيمي — {{ region_name }} (مع الاتصال) B{% else %}الهيكل التنظيمي — {{ region_name }} A{% endif %} — ميزان</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -90,8 +90,8 @@
 <body>
 
 <div class="toolbar">
-  <a href="/reports/org-chart">← العودة</a>
-  <span class="toolbar-title">الهيكل التنظيمي — {{ region_name }} (مع الاتصال)</span>
+  <a href="{{ base_path }}">← العودة</a>
+  <span class="toolbar-title">{% if with_phone %}الهيكل التنظيمي — {{ region_name }} (مع الاتصال) B{% else %}الهيكل التنظيمي — {{ region_name }} A{% endif %}</span>
   <div class="toolbar-spacer"></div>
   <button onclick="window.print()">🖨 طباعة (حفظ كـ PDF)</button>
 </div>
