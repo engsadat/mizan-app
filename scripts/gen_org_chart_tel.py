@@ -1,6 +1,6 @@
 # scripts/gen_org_chart_tel.py
 # Professional A3 org chart with a phone number for every team member.
-# Writes the files served at /reports/org-chart/<region>.
+# Writes B (Tel) files served at /reports/org-chart-tel/<region>.
 # Run from mizan root: python scripts/gen_org_chart_tel.py
 
 import os, re, shutil, sys, base64
@@ -151,10 +151,10 @@ def status_style(s):
 
 REGION_COL = {'عسير': 30, 'جازان': 31, 'الباحة': 32, 'نجران': 33}
 REGION_FILE = {
-    'عسير':   '09_OrgChart_Asir.html',
-    'جازان':  '10_OrgChart_Jizan.html',
-    'الباحة': '11_OrgChart_Baha.html',
-    'نجران':  '12_OrgChart_Najran.html',
+    'عسير':   '09_OrgChart_Asir_Tel.html',
+    'جازان':  '10_OrgChart_Jizan_Tel.html',
+    'الباحة': '11_OrgChart_Baha_Tel.html',
+    'نجران':  '12_OrgChart_Najran_Tel.html',
 }
 REGION_GROUPS = {
     'عسير':   [4, 3, 3, 3],
