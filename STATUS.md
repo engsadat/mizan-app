@@ -1,23 +1,26 @@
-# Mizan — current status (2026-08-30)
+# Mizan — current status (2026-08-31)
 
 Update this file at the end of every session. Then `git commit` + `git push`.
 Next chat: open `mizan-app` → read `CLAUDE.md` + this file → **one** task.
 Do not save status to a Claude memo.
 
-## Live (checked 2026-08-30)
+## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **not checked** this session (Excel-first code is local; **not deployed**)
-- CSRF: not checked this session
-- Login test this session: **not checked** on live
-- Local Flask: `http://127.0.0.1:5001` (`run.py`, no reloader). Local login works (admin user in `instance/mizan_dev.db` — do not record passwords)
+- URL: https://southmizan.pythonanywhere.com — **not checked** this session
+- Code deployed: **no** (merge commit a245bdd not yet on PythonAnywhere)
 
-## Code (checked 2026-08-30)
+## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- `origin/master` before merge: `2af06e4` (8 Phase-1 ticket commits landed on GitHub while this laptop was working)
-- Merged those tickets with this session’s Excel-first + org-smart fixes (`excel_data.py` remains the live employee/project reader)
-- PythonAnywhere HEAD: **not checked**
-- Local tests this session: `pytest tests -q` → re-run after merge before treating as green
+- Local: `a245bdd` (merge commit, includes both local work + Phase 1 from GitHub)
+- `origin/master`: `a245bdd` (pushed from local)
+- **Merge completed:** Resolved branch divergence
+  - **Remote** (d740d79): Phase 1 merge + job codes SQLite fix (EmployeeCache abstraction)
+  - **Local** (4307640..0ad9f34): Your Cursor work on Excel-first reports
+  - **Resolution:** Accepted remote version (more recent, better abstraction with EmployeeCache)
+  - **Merge commit:** a245bdd
+- PythonAnywhere HEAD: `d740d79` (before this merge; needs reload)
+- Tests: **not run** this session
 
 ## Leftovers (checked 2026-08-30)
 
@@ -51,6 +54,9 @@ Do **not** wipe-and-reimport SQLite. Do **not** treat `scripts/import_projects.p
 
 ## Next (one task)
 
-Wire print org charts to Excel for real: `scripts/gen_org_charts_excel.py` is now on master from the Phase 1 tickets — run it (or generate on request) so `/reports/org-chart/<region>` matches the live smart chart, then delete/ignore `scripts/test_org_charts.py`.
+**Session 8:** Review merged code locally & deploy
+1. Run tests: `pytest tests -q`
+2. If tests pass: reload web app on PythonAnywhere (pull a245bdd)
+3. Test live: verify `/reports/`, `/employees/`, org charts work with EmployeeCache
 
-Do not deploy to PythonAnywhere until the user asks after reviewing locally.
+**Known issue:** Local has your Excel-first work (4307640..0ad9f34) but remote's EmployeeCache abstraction (Phase 1) was more recent + has job codes SQLite fix. Accepted remote, now using it. If functionality missing, cherry-pick your commits after local testing passes.
