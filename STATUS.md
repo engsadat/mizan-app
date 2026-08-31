@@ -6,21 +6,21 @@ Do not save status to a Claude memo.
 
 ## Live (checked 2026-08-31)
 
-- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` shown earlier this calendar day)
+- URL: https://southmizan.pythonanywhere.com — **up** (`/auth/login` shown)
 - CSRF: not checked this session
 - Login test this session: **not checked**
-- PythonAnywhere HEAD: **not read** (no SSH). Live static Asir was still the Ticket 4 grid when fetched earlier today. It does **not** yet have A+B.
+- Laptop SSH `southMizan@ssh.pythonanywhere.com`: **Permission denied** (publickey,password). Could not pull or reload from here.
+- Live static Asir (`/static/org_charts/09_OrgChart_Asir.html`): Tel title `الهيكل التنظيمي — عسير (مع الاتصال)` — this is the Tel-only restore, not A+B.
+- Live `/static/org_charts/09_OrgChart_Asir_Tel.html`: **404**. A+B (`de7db9a`) is not on the server yet.
+- PythonAnywhere HEAD: **not read** (no SSH). Believed to be Tel-only (`70540f8` era), not `de7db9a`.
 
 ## Code (checked 2026-08-31)
 
 - Canonical: `engsadat/mizan-app` `master`
-- Laptop: A+B print org charts (this session)
-- `origin/master` before this STATUS write: `70540f8` (Tel-only restore)
-- Print org charts (do **not** regenerate with scripts):
-  - **A (default):** `09–12_OrgChart_*.html` — professional A3, no employee-phone dump
-  - **B (Tel):** `09–12_OrgChart_*_Tel.html` — same layout with phones (`مع الاتصال`)
-- Routes: `/reports/org-chart` = A, `/reports/org-chart-tel` = B. Reports page shows both icons together.
-- Local check this session: Flask test client (login disabled) → `/reports/`, `/reports/org-chart`, `/reports/org-chart-tel`, Asir A and Asir B all HTTP 200
+- Laptop = GitHub: `de7db9a` (`Offer both print org charts: A default without phones, B Tel with phones.`)
+- Print org charts on GitHub:
+  - **A (default):** `/reports/org-chart` → `09–12_OrgChart_*.html`
+  - **B (Tel):** `/reports/org-chart-tel` → `09–12_OrgChart_*_Tel.html`
 - Do **not** run `scripts/gen_org_charts_excel.py` or `scripts/test_org_charts.py`
 
 ## Leftovers (checked 2026-08-30)
@@ -40,7 +40,7 @@ Employee add / edit / status in the app is **403**. Edit the Excel file, then re
 
 ## Next (one task)
 
-Deploy GitHub `master` (A default + B Tel org charts) to PythonAnywhere. This laptop cannot SSH. User (or a PA Bash console) run:
+This laptop cannot SSH. In the PythonAnywhere **Bash console** run:
 
 ```
 cd /home/southMizan/mizan-app
@@ -50,6 +50,6 @@ git log -1 --oneline
 git status -sb
 ```
 
-Then Web tab → Reload `southmizan.pythonanywhere.com`.
+That log must show `de7db9a`. Then Web tab → Reload `southmizan.pythonanywhere.com`.
 
-Done when `/reports/` shows two org-chart icons (A 📋 and B 📞), and `/static/org_charts/09_OrgChart_Asir.html` title is `الهيكل التنظيمي — عسير` (not `المنطقة الجنوبية - NWC` and not Tel).
+Done when `/reports/` shows icons A 📋 and B 📞, Asir A title is `الهيكل التنظيمي — عسير`, and `/static/org_charts/09_OrgChart_Asir_Tel.html` is no longer 404.
